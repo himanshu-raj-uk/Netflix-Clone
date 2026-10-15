@@ -2,7 +2,7 @@ import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
 
-const BASE = "/Netflix/";
+const BASE = "Netflix-Clone";
 
 const redirectToBase = () => ({
   name: "redirect-to-base",
