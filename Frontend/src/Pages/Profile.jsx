@@ -6,13 +6,13 @@ import {
   Bookmark,
   LockKeyhole,
   LogOut,
-  Pencil,
   X,
   Check,
   Trash2,
   ChevronRight,
   UserRound,
   LoaderCircle,
+  Sparkles,
 } from "lucide-react";
 import Navbar from "../Components/Navbar";
 import { img } from "../Library/Tmdb";
@@ -24,10 +24,6 @@ import {
   updateUserProfile,
 } from "../Redux/AuthAPI";
 
-/* -------------------------------------------------------------------------- */
-/*                                  Constants                                 */
-/* -------------------------------------------------------------------------- */
-
 const TABS = [
   { key: "liked", label: "Liked", icon: Heart },
   { key: "watchlist", label: "My List", icon: Bookmark },
@@ -38,9 +34,7 @@ const LIST_TYPES = {
   watchlist: "watchlist",
 };
 
-const MAX_IMAGE_SIZE = 2 * 1024 * 1024; // 2MB (matches multer limit on backend)
-
-// Vite: VITE_TMDB_API_KEY in .env  |  CRA: use process.env.REACT_APP_TMDB_API_KEY instead
+const MAX_IMAGE_SIZE = 2 * 1024 * 1024;
 const TMDB_KEY = import.meta.env.VITE_TMDB_API_KEY;
 const TMDB_IMG = "https://image.tmdb.org/t/p";
 
@@ -57,17 +51,14 @@ const EMPTY_FORM = {
   pincode: "",
 };
 
-// text-base on mobile stops iOS zooming into inputs, sm:text-sm on larger screens
 const FIELD_CLASS =
-  "w-full rounded-lg border border-white/20 bg-transparent px-3 py-2 text-base outline-none transition-all duration-300 placeholder:text-gray-600 hover:border-red-500/60 focus:border-red-500 focus:ring-2 focus:ring-red-500/20 read-only:cursor-not-allowed read-only:opacity-60 sm:text-sm";
+  "w-full rounded-xl border border-white/10 bg-[#080B14]/80 px-3.5 py-2.5 text-base text-white outline-none transition-all duration-300 placeholder:text-slate-500 hover:border-[#8B5CF6]/50 focus:border-[#8B5CF6] focus:ring-2 focus:ring-[#8B5CF6]/20 read-only:cursor-not-allowed read-only:opacity-60 sm:text-sm";
 
-// Transparent panel. Red border lines appear while the mouse is over it.
 const GLASS =
-  "border border-white/10 bg-transparent backdrop-blur-[3px] transition-all duration-300 ease-out hover:border-red-500/80 hover:shadow-[0_0_0_1px_rgba(239,68,68,0.25),0_0_24px_rgba(239,68,68,0.12)]";
+  "border border-white/10 bg-[#111827]/85 shadow-lg transition-colors duration-200";
 
-// Responsive poster grid: columns grow/shrink with the free width
 const POSTER_GRID =
-  "grid grid-cols-[repeat(auto-fill,minmax(clamp(100px,28vw,200px),1fr))] gap-2 sm:grid-cols-[repeat(auto-fill,minmax(clamp(130px,14vw,210px),1fr))] sm:gap-3 lg:gap-4";
+  "grid grid-cols-[repeat(auto-fill,minmax(clamp(110px,28vw,200px),1fr))] gap-2.5 sm:grid-cols-[repeat(auto-fill,minmax(clamp(135px,14vw,210px),1fr))] sm:gap-3.5 lg:gap-4";
 
 const PANEL_ANIMATION = `
 @keyframes profile-fade-in {
@@ -80,15 +71,9 @@ const PANEL_ANIMATION = `
 }
 `;
 
-/* -------------------------------------------------------------------------- */
-/*                                   Helpers                                  */
-/* -------------------------------------------------------------------------- */
-
 const initials = (name) => {
   const parts = String(name || "").trim().split(/\s+/).filter(Boolean);
-
   if (!parts.length) return "";
-
   return (
     parts.length === 1
       ? parts[0].slice(0, 2)
@@ -127,10 +112,6 @@ const scrollToRef = (ref, delay = 80) =>
     ref.current?.scrollIntoView({ behavior: "smooth", block: "start" });
   }, delay);
 
-/* -------------------------------------------------------------------------- */
-/*                     Random TMDB background (changes on refresh)            */
-/* -------------------------------------------------------------------------- */
-
 function useRandomTmdbBackground() {
   const [bg, setBg] = useState(null);
 
@@ -168,46 +149,38 @@ function useRandomTmdbBackground() {
 }
 
 function Backdrop({ bg }) {
-  const imgRef = useRef(null);
   const [loaded, setLoaded] = useState(false);
 
-  useEffect(() => {
-    setLoaded(false);
-    if (imgRef.current?.complete) setLoaded(true);
-  }, [bg?.poster]);
-
   return (
-    <div aria-hidden className="fixed inset-0 z-0 overflow-hidden bg-black">
+    <div aria-hidden className="fixed inset-0 z-0 overflow-hidden bg-[#080B14]">
       {bg && (
         <picture key={bg.poster}>
-          {/* wide screens get the landscape backdrop, phones get the portrait poster */}
           <source media="(min-width: 768px)" srcSet={bg.backdrop} />
           <img
-            ref={imgRef}
             src={bg.poster}
             alt=""
             onLoad={() => setLoaded(true)}
-            className={`h-full w-full object-cover object-top transition-opacity duration-1000 ${loaded ? "opacity-60" : "opacity-0"
-              }`}
+            className={`h-full w-full object-cover object-top transition-opacity duration-1000 ${
+              loaded ? "opacity-30" : "opacity-0"
+            }`}
           />
         </picture>
       )}
 
-      <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/65 to-black/95" />
+      {/* Layered cinematic gradients */}
+      <div className="absolute inset-0 bg-gradient-to-b from-[#080B14]/60 via-[#080B14]/80 to-[#080B14]" />
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(139,92,246,0.15)_0%,transparent_60%)]" />
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_right,rgba(34,211,238,0.1)_0%,transparent_50%)]" />
     </div>
   );
 }
-
-/* -------------------------------------------------------------------------- */
-/*                                 Components                                 */
-/* -------------------------------------------------------------------------- */
 
 function Avatar({ user, className = "" }) {
   const profileImage = getImageUrl(user?.profileImage);
 
   return (
     <span
-      className={`flex shrink-0 items-center justify-center overflow-hidden rounded-xl bg-gradient-to-br from-red-500 to-red-800 font-bold text-white ring-1 ring-white/20 ${className}`}
+      className={`flex shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-gradient-to-tr from-[#8B5CF6] via-[#6366F1] to-[#22D3EE] font-bold text-white shadow-[0_0_20px_rgba(139,92,246,0.4)] ring-2 ring-white/20 ${className}`}
     >
       {profileImage ? (
         <img
@@ -231,20 +204,27 @@ function StatTile({ icon: Icon, label, value, active, onClick }) {
       role="tab"
       aria-selected={active}
       onClick={onClick}
-      className={`flex min-w-0 items-center gap-2.5 rounded-xl border bg-transparent px-3 py-2 text-left transition-all duration-300 sm:gap-3 sm:px-4 sm:py-2.5 ${active
-          ? "border-red-500/70 bg-red-600/15"
-          : "border-white/10 hover:border-red-500/70 hover:bg-white/[0.05]"
-        }`}
+      className={`flex min-w-0 items-center gap-3 rounded-xl border px-3.5 py-2.5 text-left transition-colors duration-200 sm:gap-4 sm:px-4 sm:py-3 ${
+        active
+          ? "border-[#8B5CF6] bg-[#8B5CF6]/15 text-white"
+          : "border-white/10 bg-[#111827] text-slate-300 hover:border-white/20 hover:text-white"
+      }`}
     >
-      <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-red-600/15 text-red-400 sm:h-9 sm:w-9">
-        <Icon className="h-4 w-4 sm:h-[18px] sm:w-[18px]" />
+      <span
+        className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg sm:h-9 sm:w-9 ${
+          active
+            ? "bg-[#8B5CF6] text-white"
+            : "bg-white/10 text-slate-400"
+        }`}
+      >
+        <Icon className="h-4 w-4 sm:h-4.5 sm:w-4.5" />
       </span>
 
       <span className="min-w-0">
-        <span className="block text-[clamp(1.05rem,2.2vw,1.5rem)] font-bold leading-none">
+        <span className="block text-[clamp(1.1rem,2vw,1.4rem)] font-bold leading-none text-white">
           {value}
         </span>
-        <span className="mt-1 block truncate text-[clamp(0.68rem,1.4vw,0.8rem)] text-gray-300">
+        <span className="mt-1 block truncate text-[clamp(0.7rem,1.4vw,0.8rem)] font-medium text-slate-400">
           {label}
         </span>
       </span>
@@ -263,9 +243,9 @@ function Field({
 }) {
   return (
     <div className={`min-w-0 ${className}`}>
-      <label htmlFor={name} className="mb-1 block text-xs text-gray-300">
+      <label htmlFor={name} className="mb-1 block text-xs font-semibold text-slate-300">
         {label}
-        {required && <span className="text-red-500"> *</span>}
+        {required && <span className="text-[#22D3EE]"> *</span>}
       </label>
 
       <input
@@ -288,36 +268,40 @@ function ActionTile({ icon: Icon, title, text, danger, expanded, ...props }) {
     <Tag
       {...(Tag === "button" ? { type: "button" } : {})}
       {...props}
-      className={`group flex w-full items-center gap-3 rounded-xl border bg-transparent px-3 py-2.5 text-left backdrop-blur-[3px] transition-all duration-300 sm:px-4 sm:py-3 ${danger
-          ? "border-red-500/25 hover:border-red-500 hover:bg-red-600/10"
-          : "border-white/10 hover:border-red-500/80 hover:bg-white/[0.04]"
-        }`}
+      className={`group flex w-full items-center gap-3.5 rounded-2xl border px-3.5 py-3 text-left backdrop-blur-xl transition-all duration-300 sm:px-4 sm:py-3.5 ${
+        danger
+          ? "border-red-500/20 bg-[#111827]/70 hover:border-red-500/60 hover:bg-red-950/20 hover:shadow-[0_0_20px_rgba(239,68,68,0.2)]"
+          : "border-white/10 bg-[#111827]/70 hover:border-[#8B5CF6]/60 hover:bg-[#111827] hover:shadow-[0_0_20px_rgba(139,92,246,0.2)]"
+      }`}
     >
       <span
-        className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg transition-colors duration-300 sm:h-10 sm:w-10 ${danger
-            ? "bg-red-600/10 text-red-500 group-hover:bg-red-600/20"
-            : "bg-white/[0.06] text-gray-300 group-hover:bg-red-600/15 group-hover:text-red-400"
-          }`}
+        className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl transition-all duration-300 sm:h-10 sm:w-10 ${
+          danger
+            ? "bg-red-500/10 text-red-400 group-hover:bg-red-500/20"
+            : "bg-white/[0.06] text-slate-300 group-hover:bg-[#8B5CF6]/20 group-hover:text-[#22D3EE]"
+        }`}
       >
         <Icon size={18} />
       </span>
 
       <span className="min-w-0 flex-1">
         <span
-          className={`block truncate text-[clamp(0.8rem,1.6vw,0.95rem)] font-semibold ${danger ? "text-red-400" : ""
-            }`}
+          className={`block truncate text-sm font-bold ${
+            danger ? "text-red-400" : "text-slate-100 group-hover:text-white"
+          }`}
         >
           {title}
         </span>
-        <span className="mt-0.5 block truncate text-[clamp(0.68rem,1.4vw,0.8rem)] text-gray-300">
+        <span className="mt-0.5 block truncate text-xs text-slate-400">
           {text}
         </span>
       </span>
 
       <ChevronRight
         size={18}
-        className={`shrink-0 text-gray-400 transition-transform duration-300 group-hover:text-red-400 ${expanded ? "rotate-90" : ""
-          }`}
+        className={`shrink-0 text-slate-500 transition-transform duration-300 group-hover:text-[#22D3EE] ${
+          expanded ? "rotate-90 text-[#22D3EE]" : ""
+        }`}
       />
     </Tag>
   );
@@ -352,7 +336,6 @@ function UpdateProfilePanel({ onSaved, onClose }) {
       pincode: u.address?.pincode || "",
     });
 
-  // Load the latest profile from the server (MongoDB)
   useEffect(() => {
     let active = true;
 
@@ -382,7 +365,6 @@ function UpdateProfilePanel({ onSaved, onClose }) {
     };
   }, []);
 
-  // Release blob preview URLs when they change / on unmount
   useEffect(
     () => () => {
       if (imageUrl.startsWith("blob:")) URL.revokeObjectURL(imageUrl);
@@ -392,8 +374,6 @@ function UpdateProfilePanel({ onSaved, onClose }) {
 
   const handleChange = (event) => {
     const { name, value } = event.target;
-
-    // digits only for phone + pincode
     const next =
       name === "phone" || name === "pincode"
         ? value.replace(/\D/g, "")
@@ -495,7 +475,6 @@ function UpdateProfilePanel({ onSaved, onClose }) {
       const updated = res?.data?.data;
 
       if (updated) {
-        // keep local user in sync with what MongoDB returned
         saveUser({ ...getUser(), ...updated });
         window.dispatchEvent(new Event("auth-changed"));
         onSaved(updated);
@@ -520,8 +499,8 @@ function UpdateProfilePanel({ onSaved, onClose }) {
 
   if (loading) {
     return (
-      <div className={`flex justify-center rounded-2xl py-10 ${GLASS}`}>
-        <LoaderCircle className="h-6 w-6 animate-spin text-red-500" />
+      <div className={`flex justify-center rounded-2xl py-12 ${GLASS}`}>
+        <LoaderCircle className="h-7 w-7 animate-spin text-[#8B5CF6]" />
       </div>
     );
   }
@@ -529,10 +508,10 @@ function UpdateProfilePanel({ onSaved, onClose }) {
   return (
     <form
       onSubmit={handleSubmit}
-      className={`profile-fade-in rounded-2xl p-3 sm:p-5 lg:grid lg:grid-cols-[200px_1fr] lg:gap-8 lg:p-6 ${GLASS}`}
+      className={`profile-fade-in rounded-2xl p-4 sm:p-6 lg:grid lg:grid-cols-[220px_1fr] lg:gap-8 lg:p-7 ${GLASS}`}
     >
-      {/* Photo */}
-      <div className="flex items-center gap-4 lg:flex-col lg:items-center lg:gap-3 lg:text-center">
+      {/* Photo Column */}
+      <div className="flex items-center gap-4 lg:flex-col lg:items-center lg:gap-4 lg:text-center">
         <div className="relative">
           <Avatar
             user={{ name: form.name, profileImage: imageUrl }}
@@ -543,9 +522,9 @@ function UpdateProfilePanel({ onSaved, onClose }) {
             type="button"
             onClick={() => fileRef.current?.click()}
             aria-label="Change photo"
-            className="absolute inset-0 flex items-center justify-center rounded-xl bg-black/50 opacity-90 transition-all duration-300 hover:bg-black/75 hover:opacity-100"
+            className="absolute inset-0 flex items-center justify-center rounded-2xl bg-[#080B14]/60 opacity-90 backdrop-blur-sm transition-all duration-300 hover:bg-[#080B14]/80 hover:opacity-100"
           >
-            <Camera size={22} />
+            <Camera size={22} className="text-[#22D3EE]" />
           </button>
 
           <input
@@ -561,7 +540,7 @@ function UpdateProfilePanel({ onSaved, onClose }) {
           <button
             type="button"
             onClick={() => fileRef.current?.click()}
-            className="text-sm font-semibold text-red-400 transition-colors hover:text-red-300"
+            className="text-xs font-bold text-[#22D3EE] transition-colors hover:text-[#8B5CF6]"
           >
             Change photo
           </button>
@@ -570,20 +549,20 @@ function UpdateProfilePanel({ onSaved, onClose }) {
             <button
               type="button"
               onClick={clearImage}
-              className="flex items-center gap-1.5 text-sm text-gray-300 transition-colors hover:text-red-400"
+              className="flex items-center gap-1.5 text-xs text-slate-400 transition-colors hover:text-red-400"
             >
-              <Trash2 size={14} />
+              <Trash2 size={13} />
               Remove photo
             </button>
           )}
 
-          <p className="text-xs text-gray-400">JPG or PNG, up to 2MB</p>
+          <p className="text-[11px] text-slate-500">JPG or PNG, up to 2MB</p>
         </div>
       </div>
 
-      {/* Fields */}
-      <div className="mt-4 min-w-0 lg:mt-0">
-        <h3 className="mb-2 text-sm font-semibold">Personal details</h3>
+      {/* Fields Column */}
+      <div className="mt-5 min-w-0 lg:mt-0">
+        <h3 className="mb-3 text-sm font-bold uppercase tracking-wider text-[#8B5CF6]">Personal details</h3>
 
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
           <Field
@@ -619,7 +598,7 @@ function UpdateProfilePanel({ onSaved, onClose }) {
           />
         </div>
 
-        <h3 className="mb-2 mt-4 text-sm font-semibold">Address</h3>
+        <h3 className="mb-3 mt-6 text-sm font-bold uppercase tracking-wider text-[#22D3EE]">Address details</h3>
 
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
           <Field
@@ -678,49 +657,45 @@ function UpdateProfilePanel({ onSaved, onClose }) {
         </div>
 
         {error && (
-          <p role="alert" className="mt-3 break-words text-sm text-red-400">
+          <p role="alert" className="mt-3.5 break-words text-xs font-semibold text-red-400">
             {error}
           </p>
         )}
 
         {success && (
-          <p role="status" className="mt-3 text-sm text-green-400">
+          <p role="status" className="mt-3.5 text-xs font-semibold text-[#22D3EE]">
             {success}
           </p>
         )}
 
-        <div className="mt-4 grid grid-cols-2 gap-3 sm:max-w-sm">
+        <div className="mt-5 flex flex-wrap items-center gap-2.5">
           <button
             type="submit"
             disabled={saving}
-            className="flex items-center justify-center gap-1.5 rounded-lg bg-red-600 px-4 py-2.5 text-sm font-semibold text-white transition-all duration-300 hover:bg-red-500 disabled:cursor-not-allowed disabled:opacity-60"
+            className="flex h-10 items-center justify-center gap-2 rounded-md bg-[#8B5CF6] px-5 text-xs font-semibold text-white transition-colors duration-200 hover:bg-[#7C3AED] active:scale-95 disabled:opacity-60"
           >
             {saving ? (
-              <LoaderCircle size={15} className="animate-spin" />
+              <LoaderCircle size={14} className="animate-spin" />
             ) : (
-              <Check size={15} />
+              <Check size={15} strokeWidth={2.5} />
             )}
-            {saving ? "Saving..." : "Save"}
+            <span>{saving ? "Saving..." : "Save Changes"}</span>
           </button>
 
           <button
             type="button"
             onClick={onClose}
             disabled={saving}
-            className="flex items-center justify-center gap-1.5 rounded-lg border border-white/20 px-4 py-2.5 text-sm font-semibold transition-all duration-300 hover:border-red-500/70 hover:bg-white/5 disabled:opacity-60"
+            className="flex h-10 items-center justify-center gap-1.5 rounded-md border border-white/20 bg-[#111827] px-4 text-xs font-semibold text-slate-300 transition-colors duration-200 hover:bg-white/10 hover:text-white disabled:opacity-60"
           >
-            <X size={15} />
-            Close
+            <X size={14} />
+            <span>Cancel</span>
           </button>
         </div>
       </div>
     </form>
   );
 }
-
-/* -------------------------------------------------------------------------- */
-/*                                    Page                                    */
-/* -------------------------------------------------------------------------- */
 
 export default function Profile() {
   const navigate = useNavigate();
@@ -745,10 +720,7 @@ export default function Profile() {
   const [fallbackBg, setFallbackBg] = useState(null);
 
   const [updateOpen, setUpdateOpen] = useState(false);
-  // Panel is mounted on first open and then only collapsed/expanded (smooth)
   const [panelMounted, setPanelMounted] = useState(false);
-
-  /* --------------------------- Update panel + scroll -------------------------- */
 
   const openUpdate = () => {
     setPanelMounted(true);
@@ -774,11 +746,8 @@ export default function Profile() {
     scrollToRef(listsRef, 40);
   };
 
-  /* --------------------------------- Lists --------------------------------- */
-
   const fetchLists = useCallback(async () => {
     if (!localStorage.getItem("userToken")) {
-      setListsLoading(false);
       navigate("/login", { replace: true });
       return;
     }
@@ -803,7 +772,6 @@ export default function Profile() {
 
       setLists({ liked, watchlist });
 
-      // backup background (only used if TMDB fetch is unavailable)
       setFallbackBg((current) => {
         if (current) return current;
         const withPoster = [...liked, ...watchlist].filter((m) => m.poster);
@@ -834,17 +802,22 @@ export default function Profile() {
     const syncLists = () => fetchLists();
 
     if (!localStorage.getItem("userToken")) {
-      setListsLoading(false);
-      navigate("/login", { replace: true });
-      return;
+      const redirectTimer = setTimeout(() => {
+        setListsLoading(false);
+        navigate("/login", { replace: true });
+      }, 0);
+      return () => clearTimeout(redirectTimer);
     }
 
-    fetchLists();
+    const loadTimer = setTimeout(() => {
+      fetchLists();
+    }, 0);
 
     window.addEventListener("auth-changed", syncUser);
     window.addEventListener("lists-changed", syncLists);
 
     return () => {
+      clearTimeout(loadTimer);
       window.removeEventListener("auth-changed", syncUser);
       window.removeEventListener("lists-changed", syncLists);
     };
@@ -903,7 +876,7 @@ export default function Profile() {
   const activeTab = TABS.find((t) => t.key === tab);
 
   return (
-    <div className="relative min-h-screen overflow-x-hidden bg-black text-white">
+    <div className="relative min-h-screen overflow-x-hidden bg-[#080B14] text-white">
       <style>{PANEL_ANIMATION}</style>
 
       <Backdrop bg={tmdbBg || fallbackBg} />
@@ -911,36 +884,41 @@ export default function Profile() {
       <div className="relative z-10 flex min-h-screen flex-col">
         <Navbar />
 
-        {/* flex-1 lets the saved titles use all the free height */}
-        <main className="mx-auto flex w-full max-w-[1920px] flex-1 flex-col gap-3 px-2 pb-6 pt-16 sm:gap-4 sm:px-4 sm:pt-20 lg:px-6 2xl:px-8">
-          {/* Header card */}
+        <main className="mx-auto flex w-full max-w-[1920px] flex-1 flex-col gap-4 px-3 pb-8 pt-20 sm:gap-5 sm:px-6 sm:pt-24 lg:px-10 2xl:px-14">
+          {/* Header Card */}
           <section
-            className={`flex flex-col gap-3 rounded-2xl p-3 sm:p-4 lg:p-5 ${GLASS}`}
+            className={`flex flex-col gap-4 rounded-2xl p-4 sm:p-6 lg:p-7 ${GLASS}`}
           >
-            <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between lg:gap-6">
-              <div className="flex min-w-0 items-center gap-3 sm:gap-5">
+            <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between lg:gap-6">
+              <div className="flex min-w-0 items-center gap-4 sm:gap-5">
                 <Avatar
                   user={user}
-                  className="h-14 w-14 text-lg sm:h-20 sm:w-20 sm:text-2xl lg:h-24 lg:w-24 lg:text-3xl"
+                  className="h-16 w-16 text-xl sm:h-20 sm:w-20 sm:text-2xl lg:h-24 lg:w-24 lg:text-3xl"
                 />
 
                 <div className="min-w-0">
-                  <h1 className="truncate text-[clamp(1.1rem,3vw,2rem)] font-bold leading-tight">
-                    {user.name || "Your profile"}
-                  </h1>
+                  <div className="flex items-center gap-2">
+                    <h1 className="truncate text-[clamp(1.2rem,3vw,2.2rem)] font-black leading-tight text-white">
+                      {user.name || "Your profile"}
+                    </h1>
+                    <span className="rounded-full border border-[#8B5CF6]/40 bg-[#8B5CF6]/15 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-[#22D3EE]">
+                      VIP Member
+                    </span>
+                  </div>
 
                   {user.email && (
-                    <p className="mt-0.5 truncate text-[clamp(0.72rem,1.6vw,0.9rem)] text-gray-300">
+                    <p className="mt-1 truncate text-xs text-slate-300 sm:text-sm">
                       {user.email}
                     </p>
                   )}
                 </div>
               </div>
 
+              {/* Tabs */}
               <div
                 role="tablist"
                 aria-label="Saved movies"
-                className="grid grid-cols-2 gap-2 sm:gap-3 lg:w-[clamp(300px,34vw,480px)] lg:shrink-0"
+                className="grid grid-cols-2 gap-2.5 sm:gap-3.5 lg:w-[clamp(320px,34vw,480px)] lg:shrink-0"
               >
                 {TABS.map(({ key, label, icon }) => (
                   <StatTile
@@ -954,22 +932,21 @@ export default function Profile() {
                 ))}
               </div>
             </div>
-
           </section>
 
-          {/* Saved titles */}
+          {/* Saved Titles Section */}
           <section
             ref={listsRef}
-            className={`flex flex-1 scroll-mt-16 flex-col rounded-2xl p-3 sm:scroll-mt-20 sm:p-4 lg:p-5 ${GLASS}`}
+            className={`flex flex-1 scroll-mt-20 flex-col rounded-2xl p-4 sm:scroll-mt-24 sm:p-6 lg:p-7 ${GLASS}`}
           >
-            <div className="mb-3 flex items-center justify-between gap-3">
-              <h2 className="flex min-w-0 items-center gap-2 text-[clamp(0.95rem,2vw,1.25rem)] font-semibold">
+            <div className="mb-4 flex items-center justify-between gap-3">
+              <h2 className="flex min-w-0 items-center gap-2.5 text-base font-bold sm:text-xl">
                 {activeTab && (
-                  <activeTab.icon className="h-4 w-4 shrink-0 text-red-500 sm:h-5 sm:w-5" />
+                  <activeTab.icon className="h-5 w-5 shrink-0 text-[#22D3EE]" />
                 )}
                 <span className="truncate">{activeTab?.label}</span>
-                <span className="rounded-full bg-white/10 px-2 py-0.5 text-xs font-medium text-gray-300">
-                  {items.length}
+                <span className="rounded-full border border-white/10 bg-white/5 px-2.5 py-0.5 text-xs font-semibold text-[#8B5CF6]">
+                  {items.length} titles
                 </span>
               </h2>
             </div>
@@ -977,14 +954,13 @@ export default function Profile() {
             {listError && (
               <div
                 role="alert"
-                className="mb-3 flex items-center justify-between gap-3 rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-2.5 text-sm text-red-200"
+                className="mb-4 flex items-center justify-between gap-3 rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-200"
               >
                 <span className="min-w-0 break-words">{listError}</span>
-
                 <button
                   type="button"
                   onClick={fetchLists}
-                  className="shrink-0 font-semibold text-red-300 underline underline-offset-4 transition-colors hover:text-white"
+                  className="shrink-0 font-bold text-[#22D3EE] underline underline-offset-4 hover:text-white"
                 >
                   Retry
                 </button>
@@ -992,32 +968,32 @@ export default function Profile() {
             )}
 
             {listsLoading ? (
-              <div className="flex flex-1 items-center justify-center py-12">
-                <LoaderCircle className="h-8 w-8 animate-spin text-red-500" />
+              <div className="flex flex-1 items-center justify-center py-16">
+                <LoaderCircle className="h-9 w-9 animate-spin text-[#8B5CF6]" />
               </div>
             ) : items.length === 0 ? (
-              <div className="flex flex-1 flex-col items-center justify-center px-4 py-10 text-center">
-                <div className="flex h-14 w-14 items-center justify-center rounded-full border border-red-500/30 bg-red-500/10">
+              <div className="flex flex-1 flex-col items-center justify-center px-4 py-16 text-center">
+                <div className="flex h-16 w-16 items-center justify-center rounded-2xl border border-[#8B5CF6]/30 bg-[#8B5CF6]/15 shadow-[0_0_20px_rgba(139,92,246,0.25)]">
                   {tab === "liked" ? (
-                    <Heart className="h-6 w-6 text-red-500" />
+                    <Heart className="h-7 w-7 text-[#22D3EE]" />
                   ) : (
-                    <Bookmark className="h-6 w-6 text-red-500" />
+                    <Bookmark className="h-7 w-7 text-[#8B5CF6]" />
                   )}
                 </div>
 
-                <p className="mt-4 text-[clamp(0.95rem,2vw,1.15rem)] font-semibold">
-                  {tab === "liked" ? "Nothing liked yet" : "Your list is empty"}
+                <p className="mt-5 text-lg font-bold text-white">
+                  {tab === "liked" ? "No liked movies yet" : "Your list is waiting"}
                 </p>
 
-                <p className="mx-auto mt-1.5 max-w-xs text-[clamp(0.8rem,1.6vw,0.9rem)] leading-relaxed text-gray-300">
+                <p className="mx-auto mt-2 max-w-sm text-sm leading-relaxed text-slate-400">
                   {tab === "liked"
-                    ? "Tap the Like button on any movie or show and it will show up here."
-                    : "Add movies and shows to My List to keep track of what to watch next."}
+                    ? "Click the thumbs up icon on any title to save your favorite movies and shows here."
+                    : "Add upcoming or interesting titles to My List to build your personal watchlist."}
                 </p>
 
                 <Link
                   to="/"
-                  className="mt-5 inline-flex items-center justify-center rounded-lg bg-red-600 px-5 py-2.5 text-sm font-semibold transition-all duration-300 hover:bg-red-500"
+                  className="mt-5 inline-flex items-center justify-center rounded-md bg-[#8B5CF6] px-5 py-2 text-xs font-semibold text-white transition-colors duration-200 hover:bg-[#7C3AED]"
                 >
                   Browse titles
                 </Link>
@@ -1031,46 +1007,48 @@ export default function Profile() {
                   >
                     <Link
                       to={`/watch/${item.mediaType}/${item.id}`}
-                      className="profile-movie-card relative block overflow-hidden rounded-lg border border-red-600/70 bg-black/30 transition-all duration-300 ease-out hover:-translate-y-0.5 hover:border-red-400 hover:shadow-[0_0_8px_rgba(239,68,68,0.35),0_0_22px_rgba(239,68,68,0.16)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
+                      className="relative block overflow-hidden rounded-xl border border-white/10 bg-[#111827] transition-all duration-300 ease-out hover:-translate-y-1 hover:border-[#8B5CF6] hover:shadow-[0_8px_25px_rgba(0,0,0,0.6),0_0_20px_rgba(139,92,246,0.3)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8B5CF6]"
                     >
-                      {/* poster fills whatever width the grid column gives it */}
-                      <div className="aspect-[2/3] w-full overflow-hidden bg-[#181818]">
+                      <div className="aspect-[2/3] w-full overflow-hidden bg-[#151d30]">
                         {item.poster ? (
                           <img
                             src={img(item.poster)}
                             alt={item.title}
                             loading="lazy"
-                            className="h-full w-full object-cover transition-transform duration-500 ease-out group-hover:scale-[1.05]"
+                            className="h-full w-full object-cover transition-transform duration-500 ease-out group-hover:scale-105"
                           />
                         ) : (
-                          <div className="flex h-full items-center justify-center p-3 text-center text-[clamp(0.7rem,1.5vw,0.85rem)] text-gray-300">
+                          <div className="flex h-full items-center justify-center p-3 text-center text-xs text-slate-400">
                             {item.title}
                           </div>
                         )}
                       </div>
 
-                      <div className="min-w-0 bg-black/60 px-2 py-1.5 sm:px-3 sm:py-2">
-                        <p className="truncate text-[clamp(0.72rem,1.5vw,0.9rem)] font-semibold text-white">
+                      <div className="min-w-0 bg-[#080B14]/90 px-2.5 py-2">
+                        <p className="truncate text-xs font-bold text-white">
                           {item.title}
                         </p>
 
-                        <p className="mt-0.5 truncate text-[clamp(0.62rem,1.2vw,0.78rem)] text-gray-300">
+                        <p className="mt-0.5 truncate text-[11px] font-medium text-slate-400">
                           {item.year || "—"} ·{" "}
-                          {item.mediaType === "tv" ? "Series" : "Movie"}
+                          <span className="text-[#22D3EE] uppercase tracking-wide">
+                            {item.mediaType === "tv" ? "Series" : "Movie"}
+                          </span>
                         </p>
                       </div>
                     </Link>
 
+                    {/* Quick remove button */}
                     <button
                       type="button"
                       onClick={() => handleRemove(item)}
                       disabled={removingId === String(item.mongoId)}
                       aria-label={`Remove ${item.title}`}
                       title="Remove from list"
-                      className="absolute right-1.5 top-1.5 flex h-7 w-7 items-center justify-center rounded-full border border-white/20 bg-black/80 text-white shadow-lg transition-all duration-300 hover:border-red-400 hover:bg-red-600 disabled:cursor-not-allowed disabled:opacity-50 sm:h-8 sm:w-8 [@media(hover:hover)]:opacity-0 [@media(hover:hover)]:group-focus-within:opacity-100 [@media(hover:hover)]:group-hover:opacity-100"
+                      className="absolute right-2 top-2 flex h-7 w-7 items-center justify-center rounded-full border border-white/20 bg-[#080B14]/85 text-slate-300 shadow-lg backdrop-blur-md transition-all duration-300 hover:border-red-400 hover:bg-red-600 hover:text-white disabled:cursor-not-allowed disabled:opacity-50 sm:h-8 sm:w-8 [@media(hover:hover)]:opacity-0 [@media(hover:hover)]:group-focus-within:opacity-100 [@media(hover:hover)]:group-hover:opacity-100"
                     >
                       {removingId === String(item.mongoId) ? (
-                        <LoaderCircle size={14} className="animate-spin" />
+                        <LoaderCircle size={14} className="animate-spin text-red-400" />
                       ) : (
                         <X size={14} />
                       )}
@@ -1081,17 +1059,17 @@ export default function Profile() {
             )}
           </section>
 
-          {/* Account */}
-          <section ref={accountRef} className="scroll-mt-16 sm:scroll-mt-20">
-            <h2 className="mb-2 text-[clamp(0.95rem,2vw,1.15rem)] font-semibold">
-              Account
+          {/* Account Settings Section */}
+          <section ref={accountRef} className="scroll-mt-20 sm:scroll-mt-24">
+            <h2 className="mb-3 text-sm font-bold uppercase tracking-wider text-[#8B5CF6]">
+              Account & Security
             </h2>
 
-            <div className="grid grid-cols-1 gap-2 sm:gap-3 md:grid-cols-3">
+            <div className="grid grid-cols-1 gap-2.5 sm:gap-3.5 md:grid-cols-3">
               <ActionTile
                 icon={UserRound}
                 title="Update profile"
-                text="Name, photo, phone and address"
+                text="Name, photo, phone & address"
                 expanded={updateOpen}
                 aria-expanded={updateOpen}
                 aria-controls="update-profile-panel"
@@ -1108,21 +1086,22 @@ export default function Profile() {
               <ActionTile
                 icon={LogOut}
                 title="Sign out"
-                text="Sign out of this device"
+                text="Sign out of your session"
                 danger
                 onClick={handleLogout}
               />
             </div>
 
-            {/* Smooth expand / collapse */}
+            {/* Smooth Collapsible Edit Panel */}
             <div
               id="update-profile-panel"
               ref={panelRef}
               aria-hidden={!updateOpen}
-              className={`grid scroll-mt-16 transition-[grid-template-rows,margin,opacity] duration-500 ease-in-out sm:scroll-mt-20 ${updateOpen
-                  ? "mt-2 grid-rows-[1fr] opacity-100 sm:mt-3"
+              className={`grid scroll-mt-20 transition-[grid-template-rows,margin,opacity] duration-500 ease-in-out sm:scroll-mt-24 ${
+                updateOpen
+                  ? "mt-3 grid-rows-[1fr] opacity-100"
                   : "invisible mt-0 grid-rows-[0fr] opacity-0"
-                }`}
+              }`}
             >
               <div className="min-h-0 overflow-hidden">
                 {panelMounted && (

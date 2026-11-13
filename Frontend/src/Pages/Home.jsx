@@ -5,27 +5,43 @@ import Footer from "../Components/Footer";
 import requests from "../Library/Tmdb";
 
 const ROWS = [
-  { title: "Trending Now", url: requests.trending },
-  { title: "Netflix Originals", url: requests.netflixOriginals },
-  { title: "Top Rated", url: requests.topRated },
-  { title: "Action Movies", url: requests.actionMovies },
-  { title: "Comedy Movies", url: requests.comedyMovies },
-  { title: "Horror Movies", url: requests.horrorMovies },
-  { title: "Romance Movies", url: requests.romanceMovies },
-  { title: "Documentaries", url: requests.documentaries },
+  { title: "Trending Now", titleKey: "trendingNow", url: requests.trending, isFirstRow: true },
+  { title: "Featured Originals", titleKey: "netflixOriginals", url: requests.netflixOriginals },
+  { title: "Top Rated Cinema", titleKey: "topRated", url: requests.topRated },
+  { title: "Action & Adventure", titleKey: "actionMovies", url: requests.actionMovies },
+  { title: "Comedy Hits", titleKey: "comedyMovies", url: requests.comedyMovies },
+  { title: "Thrills & Horror", titleKey: "horrorMovies", url: requests.horrorMovies },
+  { title: "Romance & Drama", titleKey: "romanceMovies", url: requests.romanceMovies },
+  { title: "Documentaries", titleKey: "documentaries", url: requests.documentaries },
 ];
 
 export default function Home() {
   return (
-    <div className="min-h-screen bg-black">
+    <div className="relative min-h-screen bg-[#080B14] text-white overflow-hidden">
+      {/* Subtle ambient lighting spots across the page */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none fixed top-[20%] left-[-10%] h-[500px] w-[500px] rounded-full bg-[#8B5CF6]/[0.04] blur-[140px]"
+      />
+      <div
+        aria-hidden="true"
+        className="pointer-events-none fixed top-[60%] right-[-10%] h-[600px] w-[600px] rounded-full bg-[#22D3EE]/[0.03] blur-[150px]"
+      />
+
       <Navbar />
 
       <Banner />
 
-      {/* Normal flow: no negative margin, so rows never cover the banner */}
-      <div className="relative z-10 space-y-2 pb-10 pt-6 sm:space-y-4 sm:pt-10 md:pt-12">
+      {/* Rows Container */}
+      <div className="relative z-10 space-y-4 pb-12 pt-2 sm:space-y-6 sm:pt-4 md:space-y-8 md:pt-6">
         {ROWS.map((row) => (
-          <Row key={row.title} title={row.title} fetchUrl={row.url} />
+          <Row
+            key={row.title}
+            title={row.title}
+            titleKey={row.titleKey}
+            fetchUrl={row.url}
+            isFirstRow={row.isFirstRow}
+          />
         ))}
       </div>
 

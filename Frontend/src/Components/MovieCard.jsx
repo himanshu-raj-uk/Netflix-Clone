@@ -7,23 +7,12 @@ import {
   ThumbsUp,
   ChevronDown,
   LoaderCircle,
+  Star,
 } from "lucide-react";
-import { useLanguage } from "../Context/LanguageContext";
-import { translations } from "../Data/Translations";
 import { addMovieToList } from "../Redux/AuthAPI";
 
-/* Responsive sizes: everything scales smoothly with the screen width */
-const BTN_SIZE =
-  "h-[clamp(1.6rem,1.1rem+1.5vw,2.4rem)] w-[clamp(1.6rem,1.1rem+1.5vw,2.4rem)]";
-
-const ICON =
-  "h-[clamp(0.75rem,0.55rem+0.6vw,1.1rem)] w-[clamp(0.75rem,0.55rem+0.6vw,1.1rem)]";
-
-const ACTION_BTN = `flex ${BTN_SIZE} shrink-0 items-center justify-center rounded-full border border-white/35 bg-black/50 text-white shadow-sm backdrop-blur-sm transition-all duration-300 hover:border-red-400 hover:bg-red-600 hover:shadow-[0_0_12px_rgba(239,68,68,0.35)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500`;
-
-const TITLE_TEXT = "text-[clamp(0.7rem,0.55rem+0.5vw,0.95rem)]";
-const META_TEXT = "text-[clamp(0.6rem,0.5rem+0.3vw,0.78rem)]";
-const MESSAGE_TEXT = "text-[clamp(0.65rem,0.5rem+0.4vw,0.85rem)]";
+const ACTION_BTN =
+  "flex h-6 w-6 sm:h-7 sm:w-7 md:h-8 md:w-8 shrink-0 items-center justify-center rounded-full border border-white/20 bg-[#111827]/90 text-white transition-colors duration-200 hover:border-white/40 hover:bg-white/15 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8B5CF6] active:scale-95";
 
 const GUEST_KEYS = {
   watchlist: "guest_watchlist",
@@ -38,7 +27,6 @@ const readGuestList = (listType) => {
     const value = JSON.parse(
       localStorage.getItem(GUEST_KEYS[listType]) || "[]"
     );
-
     return Array.isArray(value) ? value : [];
   } catch {
     return [];
@@ -66,8 +54,6 @@ const getSavedMovieData = (movie, mediaType) => ({
 
 export default function MovieCard({ movie }) {
   const navigate = useNavigate();
-  const { language } = useLanguage();
-  const t = (translations[language] || translations.en).movieCard;
 
   const [loaded, setLoaded] = useState(false);
   const [detailsVisible, setDetailsVisible] = useState(false);
@@ -137,15 +123,21 @@ export default function MovieCard({ movie }) {
     []
   );
 
-  const goToTrailer = () => {
+  const goToTrailer = (e) => {
+    e?.stopPropagation?.();
     navigate(`/watch/${mediaType}/${movie.id}`, {
       state: { movie, mediaType },
     });
   };
 
-  const saveMovieToList = async (listType) => {
-    if (savingList || !movie?.id) return;
+  const toggleDetails = (e) => {
+    e?.stopPropagation?.();
+    setDetailsVisible((prev) => !prev);
+  };
 
+  const saveMovieToList = async (listType, e) => {
+    e?.stopPropagation?.();
+    if (savingList || !movie?.id) return;
     if (!["watchlist", "likelist"].includes(listType)) return;
 
     const token = localStorage.getItem("userToken");
@@ -156,7 +148,6 @@ export default function MovieCard({ movie }) {
     try {
       if (!token) {
         const currentList = readGuestList(listType);
-
         const alreadySaved = currentList.some(
           (item) => getMovieKey(item) === movieKey
         );
@@ -177,13 +168,12 @@ export default function MovieCard({ movie }) {
         showCardMessage(
           listType === "likelist"
             ? alreadySaved
-              ? "Removed from your Liked titles."
-              : "Added to your Liked titles."
+              ? "Removed from Liked titles."
+              : "Added to Liked titles."
             : alreadySaved
               ? "Removed from My List."
-              : "Added to My List successfully."
+              : "Added to My List."
         );
-
         return;
       }
 
@@ -196,15 +186,15 @@ export default function MovieCard({ movie }) {
 
       showCardMessage(
         listType === "likelist"
-          ? "Added to your Liked titles."
-          : "Added to My List successfully."
+          ? "Added to Liked titles."
+          : "Added to My List."
       );
 
       window.dispatchEvent(new Event("lists-changed"));
     } catch (error) {
       showCardMessage(
         error?.response?.data?.message ||
-        "Couldn't save this title. Please try again."
+        "Couldn't save title. Try again."
       );
     } finally {
       setSavingList("");
@@ -217,22 +207,16 @@ export default function MovieCard({ movie }) {
       : `https://image.tmdb.org/t/p/w500${posterPath}`
     : "";
 
-  // Icons + text appear only on hover (or keyboard focus, or after a tap on touch screens)
-  const revealClass = detailsVisible
-    ? "opacity-100"
-    : "pointer-events-none opacity-0 group-focus-within:pointer-events-auto group-focus-within:opacity-100";
-
   return (
     <article
-      className="group relative aspect-[2/3] min-w-0 overflow-hidden rounded-lg border border-transparent bg-[#111] transition-[border-color,box-shadow,transform] duration-300 ease-out hover:border-red-500 hover:shadow-[0_0_10px_rgba(239,68,68,0.45),0_0_26px_rgba(239,68,68,0.2)] focus-within:border-red-500 focus-within:shadow-[0_0_12px_rgba(239,68,68,0.3)]"
-      onMouseEnter={() => setDetailsVisible(true)}
-      onMouseLeave={() => setDetailsVisible(false)}
-      onTouchStart={() => setDetailsVisible(true)}
+      className="group relative aspect-[2/3] min-w-0 overflow-hidden rounded-xl border border-[#8B5CF6]/30 bg-[#111827] shadow-lg transition-all duration-300 ease-out hover:-translate-y-1 hover:border-[#8B5CF6] focus-within:border-[#8B5CF6]"
     >
+      {/* Skeleton loader shimmer */}
       {!loaded && (
-        <div className="absolute inset-0 animate-pulse bg-white/[0.07]" />
+        <div className="absolute inset-0 animate-pulse bg-[#151d30]" />
       )}
 
+      {/* Poster Image */}
       {imageUrl && (
         <img
           src={imageUrl}
@@ -240,125 +224,152 @@ export default function MovieCard({ movie }) {
           loading="lazy"
           onLoad={() => setLoaded(true)}
           onError={() => setLoaded(true)}
-          className={`h-full w-full object-cover transition-all duration-500 ease-out group-hover:scale-[1.04] ${loaded ? "opacity-100" : "opacity-0"
-            }`}
+          className={`h-full w-full object-cover transition-transform duration-300 ease-out group-hover:scale-[1.03] ${
+            loaded ? "opacity-100" : "opacity-0"
+          }`}
         />
       )}
 
       {!imageUrl && (
-        <div
-          className={`flex h-full items-center justify-center p-3 text-center text-gray-400 ${TITLE_TEXT}`}
-        >
+        <div className="flex h-full items-center justify-center p-3 text-center text-xs text-slate-400">
           {title}
         </div>
       )}
 
-      {/* dark gradient only while hovering, so the poster stays clean otherwise */}
+      {/* Rating badge on top right */}
+      {movie?.vote_average > 0 && (
+        <div className="absolute right-1.5 top-1.5 z-10 flex items-center gap-1 rounded bg-[#080B14]/90 px-1.5 py-0.5 text-[9px] font-semibold text-[#22D3EE] backdrop-blur-sm sm:text-[10px]">
+          <Star size={9} className="fill-[#22D3EE] text-[#22D3EE]" />
+          <span>{movie.vote_average.toFixed(1)}</span>
+        </div>
+      )}
+
+      {/* Bright ambient background gradient overlay */}
       <div
-        className={`pointer-events-none absolute inset-0 bg-gradient-to-t from-black via-black/30 to-transparent transition-opacity duration-300 ${detailsVisible ? "opacity-100" : "opacity-0 group-focus-within:opacity-100"
-          }`}
+        className={`pointer-events-none absolute inset-0 transition-opacity duration-300 ${
+          detailsVisible
+            ? "bg-gradient-to-t from-[#1e1b4b] via-[#111827]/90 to-transparent opacity-95"
+            : "bg-gradient-to-t from-[#1e1b4b]/80 via-transparent to-transparent opacity-70"
+        }`}
       />
 
-      <div className="absolute inset-x-0 bottom-0 p-[clamp(0.4rem,0.2rem+0.8vw,0.8rem)]">
-        <div
-          className={`mb-[clamp(0.3rem,0.2rem+0.4vw,0.55rem)] flex flex-wrap items-center gap-[clamp(0.25rem,0.15rem+0.4vw,0.45rem)] transition-opacity duration-300 ${revealClass}`}
-        >
+      {/* Ambient bright violet-cyan glow in card background */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute -bottom-10 inset-x-0 h-36 bg-[radial-gradient(ellipse_at_bottom,rgba(139,92,246,0.35)_0%,rgba(34,211,238,0.18)_40%,transparent_75%)]"
+      />
+
+      {/* Card Content & Action Bar */}
+      <div className="absolute inset-x-0 bottom-0 p-1.5 sm:p-2.5">
+        {/* Button Row */}
+        <div className="mb-1 sm:mb-1.5 flex items-center gap-1 sm:gap-1.5">
+          {/* Simple Play Button */}
           <button
             type="button"
             onClick={goToTrailer}
             aria-label={`Play ${title}`}
-            className={`flex ${BTN_SIZE} shrink-0 items-center justify-center rounded-full border border-white/70 bg-white text-black shadow-md transition-all duration-300 hover:border-red-400 hover:bg-red-600 hover:text-white`}
+            className="flex h-6 w-6 sm:h-7 sm:w-7 md:h-8 md:w-8 shrink-0 items-center justify-center rounded-full bg-[#8B5CF6] text-white transition-colors duration-200 hover:bg-[#7C3AED] active:scale-95"
           >
-            <Play className={`${ICON} fill-current`} />
+            <Play size={11} fill="currentColor" className="ml-0.5 sm:scale-110" />
           </button>
 
+          {/* Add to Watchlist */}
           <button
             type="button"
-            onClick={() => saveMovieToList("watchlist")}
+            onClick={(e) => saveMovieToList("watchlist", e)}
             disabled={savingList !== ""}
             aria-label="Add to My List"
             title="Add to My List"
-            className={`${ACTION_BTN} ${savedLists.watchlist
-                ? "border-red-400 bg-red-600 text-white shadow-[0_0_10px_rgba(239,68,68,0.3)]"
+            className={`${ACTION_BTN} ${
+              savedLists.watchlist
+                ? "border-[#22D3EE] bg-[#22D3EE]/20 text-[#22D3EE]"
                 : ""
-              }`}
+            }`}
           >
             {savingList === "watchlist" ? (
-              <LoaderCircle className={`${ICON} animate-spin`} />
+              <LoaderCircle size={11} className="animate-spin sm:scale-110" />
             ) : savedLists.watchlist ? (
-              <Check className={ICON} />
+              <Check size={11} strokeWidth={2.5} className="sm:scale-110" />
             ) : (
-              <Plus className={ICON} />
+              <Plus size={11} className="sm:scale-110" />
             )}
           </button>
 
+          {/* Like Title */}
           <button
             type="button"
-            onClick={() => saveMovieToList("likelist")}
+            onClick={(e) => saveMovieToList("likelist", e)}
             disabled={savingList !== ""}
             aria-label="Like title"
             title="Like title"
-            className={`${ACTION_BTN} ${savedLists.likelist
-                ? "border-red-400 bg-red-600 text-white shadow-[0_0_10px_rgba(239,68,68,0.3)]"
+            className={`${ACTION_BTN} ${
+              savedLists.likelist
+                ? "border-[#8B5CF6] bg-[#8B5CF6]/20 text-[#8B5CF6]"
                 : ""
-              }`}
+            }`}
           >
             {savingList === "likelist" ? (
-              <LoaderCircle className={`${ICON} animate-spin`} />
+              <LoaderCircle size={11} className="animate-spin sm:scale-110" />
             ) : (
               <ThumbsUp
-                className={`${ICON} ${savedLists.likelist ? "fill-current" : ""
-                  }`}
+                size={11}
+                className={`sm:scale-110 ${savedLists.likelist ? "fill-current text-[#8B5CF6]" : ""}`}
               />
             )}
           </button>
 
+          {/* Toggle Button: anchor down or up to hide or show movie data */}
           <button
             type="button"
-            onClick={() => setDetailsVisible((previous) => !previous)}
-            aria-label="Show movie details"
-            className={`${ACTION_BTN} ml-auto`}
+            onClick={toggleDetails}
+            aria-label={detailsVisible ? "Hide movie data" : "Show movie data"}
+            title={detailsVisible ? "Hide data" : "Show data"}
+            className={`${ACTION_BTN} ${
+              detailsVisible ? "border-[#22D3EE] text-[#22D3EE]" : "text-slate-300"
+            }`}
           >
             <ChevronDown
-              className={`${ICON} transition-transform duration-300 ${detailsVisible ? "rotate-180" : ""
-                }`}
+              size={13}
+              className={`transition-transform duration-300 sm:scale-110 ${
+                detailsVisible ? "rotate-180 text-[#22D3EE]" : "rotate-0 text-slate-300"
+              }`}
             />
           </button>
         </div>
 
+        {/* Action feedback message */}
         {cardMessage && (
           <div
             role="status"
             aria-live="polite"
-            className={`mb-2 rounded-lg border border-red-500/50 bg-black/90 px-2 py-1.5 text-center font-medium leading-snug text-white shadow-[0_0_16px_rgba(239,68,68,0.15)] backdrop-blur-md sm:px-3 sm:py-2 ${MESSAGE_TEXT}`}
+            className="mb-1 rounded border border-[#8B5CF6]/40 bg-[#111827] px-2 py-1 text-center text-[10px] sm:text-xs font-medium text-[#22D3EE]"
           >
             {cardMessage}
           </div>
         )}
 
-        {/* title, year and overview: visible only on hover */}
+        {/* Title & Metadata: shown or hidden via the toggle button */}
         <div
-          className={`overflow-hidden transition-all duration-300 ease-out ${detailsVisible
-              ? "max-h-40 opacity-100"
-              : "max-h-0 opacity-0 group-focus-within:max-h-40 group-focus-within:opacity-100"
-            }`}
+          className={`overflow-hidden transition-all duration-300 ease-out ${
+            detailsVisible
+              ? "max-h-48 opacity-100"
+              : "max-h-0 opacity-0 pointer-events-none"
+          }`}
         >
-          <h3 className={`truncate font-semibold text-white ${TITLE_TEXT}`}>
+          <h3 className="truncate text-xs font-bold text-white sm:text-sm">
             {title}
           </h3>
 
-          <div
-            className={`mt-0.5 flex items-center gap-1.5 text-gray-300 sm:gap-2 ${META_TEXT}`}
-          >
+          <div className="mt-0.5 flex items-center gap-1.5 text-[10px] font-medium text-slate-300 sm:text-xs">
             {year && <span>{year}</span>}
-            {year && <span>·</span>}
-            <span>{mediaType === "tv" ? "Series" : "Movie"}</span>
+            {year && <span className="text-white/30">•</span>}
+            <span className="uppercase text-[#22D3EE] font-semibold">
+              {mediaType === "tv" ? "Series" : "Movie"}
+            </span>
           </div>
 
           {movie?.overview && (
-            <p
-              className={`mt-1 line-clamp-2 leading-relaxed text-gray-300 sm:line-clamp-3 ${META_TEXT}`}
-            >
+            <p className="mt-1 line-clamp-2 text-[10px] leading-snug text-slate-300 sm:text-xs sm:leading-relaxed">
               {movie.overview}
             </p>
           )}

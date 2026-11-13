@@ -19,14 +19,18 @@ export default function useMovies(source) {
         : "";
 
     if (!url) {
-      setMovies([]);
-      setLoading(false);
-      return;
+      const timer = setTimeout(() => {
+        setMovies([]);
+        setLoading(false);
+      }, 0);
+      return () => clearTimeout(timer);
     }
 
     const controller = new AbortController();
-    setLoading(true);
-    setError("");
+    const initTimer = setTimeout(() => {
+      setLoading(true);
+      setError("");
+    }, 0);
 
     fetch(url, { signal: controller.signal })
       .then((res) => {
@@ -41,7 +45,10 @@ export default function useMovies(source) {
         if (!controller.signal.aborted) setLoading(false);
       });
 
-    return () => controller.abort();
+    return () => {
+      clearTimeout(initTimer);
+      controller.abort();
+    };
   }, [source]);
 
   return { movies, data: movies, loading, error };

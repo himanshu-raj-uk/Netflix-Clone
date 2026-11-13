@@ -7,7 +7,6 @@ import { ArrowLeft, CircleAlert, Eye, EyeOff } from "lucide-react";
 export const getMessage = (error, fallback) =>
   error?.response?.data?.message || error?.response?.data?.error || fallback;
 
-// True when the 404 comes from a missing backend route (not from "user not found")
 export const isRouteNotFound = (error) => {
   if (error?.response?.status !== 404) return false;
   const message = error.response?.data?.message;
@@ -18,11 +17,9 @@ export const normalizeEmail = (value = "") => value.trim().toLowerCase();
 
 export const isEmail = (value = "") => /^\S+@\S+\.\S+$/.test(value);
 
-// Finds which field a server message belongs to. rules = { email: /email/i, ... }
 export const fieldFromMessage = (message = "", rules = {}) =>
   Object.keys(rules).find((key) => rules[key].test(message)) || "form";
 
-// Keeps the verification / reset token between pages (cleared when the tab closes)
 export const authFlow = {
   save: (data) => sessionStorage.setItem("authFlow", JSON.stringify(data)),
   get: () => {
@@ -43,7 +40,6 @@ export const maskEmail = (email = "") => {
 
 /* ---------------- styles ---------------- */
 
-// Keeps browser autofill from painting fields white / blue
 const AUTH_CSS = `
 .auth-input { color-scheme: dark; }
 .auth-input:-webkit-autofill,
@@ -51,58 +47,74 @@ const AUTH_CSS = `
 .auth-input:-webkit-autofill:focus {
   -webkit-text-fill-color: #fff;
   caret-color: #fff;
-  box-shadow: 0 0 0 1000px transparent inset;
+  box-shadow: 0 0 0 1000px #111827 inset;
   transition: background-color 600000s 0s, color 600000s 0s;
 }
 `;
 
 const fieldClass = (hasError, compact) =>
-  `auth-input ${compact ? "h-10" : "h-12"} w-full rounded-lg border bg-transparent py-2 pl-11 pr-4 text-sm text-white outline-none transition-colors duration-200 placeholder:text-gray-500 hover:border-red-500/70 focus:border-red-500 focus:ring-2 focus:ring-red-500/20 disabled:cursor-not-allowed disabled:opacity-60 ${
-    hasError ? "border-red-500" : "border-white/25"
+  `auth-input ${compact ? "h-10" : "h-12"} w-full rounded-xl border bg-[#111827]/70 py-2 pl-11 pr-4 text-sm text-white outline-none transition-all duration-300 placeholder:text-slate-500 hover:border-[#8B5CF6]/50 focus:border-[#8B5CF6] focus:ring-2 focus:ring-[#8B5CF6]/25 disabled:cursor-not-allowed disabled:opacity-60 ${
+    hasError
+      ? "border-red-500/80 focus:border-red-500 focus:ring-red-500/20"
+      : "border-white/10"
   }`;
 
 export const primaryBtn =
-  "flex h-12 w-full items-center justify-center gap-2 rounded-lg bg-red-600 px-4 text-sm font-bold text-white shadow-lg shadow-red-950/30 transition-colors hover:bg-red-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-400 focus-visible:ring-offset-2 focus-visible:ring-offset-black active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-70";
+  "flex h-11 w-full items-center justify-center gap-2 rounded-lg bg-[#8B5CF6] px-4 text-sm font-semibold text-white transition-colors duration-200 hover:bg-[#7C3AED] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8B5CF6] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60";
 
-export const linkBtn = "font-semibold text-white transition-colors hover:text-red-400 hover:underline";
+export const linkBtn =
+  "font-semibold text-[#22D3EE] transition-colors hover:text-[#8B5CF6] hover:underline underline-offset-4";
 
 /* ---------------- layout ---------------- */
 
 export function AuthLayout({ children, wide = false }) {
   return (
-    <main className="relative flex min-h-screen items-center justify-center overflow-hidden bg-black px-4 py-4 text-white sm:px-6">
+    <main className="relative flex min-h-screen items-center justify-center overflow-hidden bg-[#080B14] px-4 py-8 text-white sm:px-6">
       <style>{AUTH_CSS}</style>
 
+      {/* Cinematic Backdrop Image with soft opacity */}
       <div
         aria-hidden="true"
-        className="absolute inset-0 bg-cover bg-center"
+        className="absolute inset-0 bg-cover bg-center opacity-40 blur-sm scale-105 transition-transform duration-1000"
         style={{
           backgroundImage:
             "url('https://image.tmdb.org/t/p/original/56v2KjBlU4XaOv9rVYEQypROD7P.jpg')",
         }}
       />
+
+      {/* Layered cinematic overlays (Midnight gradient + Violet/Cyan spotlights) */}
       <div
         aria-hidden="true"
-        className="absolute inset-0 bg-[linear-gradient(to_right,rgba(0,0,0,0.88),rgba(0,0,0,0.5),rgba(0,0,0,0.85)),linear-gradient(to_top,#000_0%,transparent_55%,rgba(0,0,0,0.75)_100%)]"
+        className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(139,92,246,0.2)_0%,transparent_60%)]"
+      />
+      <div
+        aria-hidden="true"
+        className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_right,rgba(34,211,238,0.15)_0%,transparent_50%)]"
+      />
+      <div
+        aria-hidden="true"
+        className="absolute inset-0 bg-[linear-gradient(to_right,rgba(8,11,20,0.92),rgba(8,11,20,0.7),rgba(8,11,20,0.92)),linear-gradient(to_top,#080B14_0%,transparent_60%,rgba(8,11,20,0.8)_100%)]"
       />
 
+      {/* Brand logo top left */}
       <Link
         to="/"
         aria-label="Netflix home"
-        className="absolute left-4 top-4 z-20 transition-opacity hover:opacity-80 sm:left-8 sm:top-6"
+        className="absolute left-5 top-5 z-20 transition-all duration-300 hover:scale-105 sm:left-8 sm:top-7"
       >
         <img
           src="https://upload.wikimedia.org/wikipedia/commons/0/08/Netflix_2015_logo.svg"
           alt="Netflix"
-          className="w-24 sm:w-32"
+          className="w-24 sm:w-32 drop-shadow-[0_2px_12px_rgba(0,0,0,0.9)]"
         />
       </Link>
 
+      {/* Main Glassmorphic Auth Card */}
       <section
-        className={`relative z-10 w-full rounded-xl border border-white/10 bg-black/60 shadow-2xl shadow-black/50 backdrop-blur-md ${
+        className={`relative z-10 w-full rounded-2xl border border-white/10 bg-[#111827]/85 shadow-[0_20px_60px_rgba(0,0,0,0.85),0_0_35px_rgba(139,92,246,0.15)] backdrop-blur-2xl ${
           wide
-            ? "mt-12 max-w-[520px] px-5 py-5 sm:mt-8 sm:px-7 sm:py-6"
-            : "mt-14 max-w-[400px] px-5 py-7 sm:mt-10 sm:px-8 sm:py-8"
+            ? "mt-12 max-w-[540px] px-6 py-6 sm:mt-10 sm:px-8 sm:py-7"
+            : "mt-14 max-w-[420px] px-6 py-8 sm:mt-12 sm:px-8 sm:py-9"
         }`}
       >
         {children}
@@ -115,9 +127,9 @@ export function BackLink({ to, children = "Back to sign in" }) {
   return (
     <Link
       to={to}
-      className="mb-5 inline-flex items-center gap-1.5 text-sm text-gray-400 transition-colors hover:text-red-400"
+      className="mb-5 inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-slate-400 transition-colors hover:text-[#22D3EE]"
     >
-      <ArrowLeft size={16} />
+      <ArrowLeft size={15} />
       {children}
     </Link>
   );
@@ -125,19 +137,19 @@ export function BackLink({ to, children = "Back to sign in" }) {
 
 export function Heading({ eyebrow, title, text, compact = false }) {
   return (
-    <div className={compact ? "mb-3" : "mb-6"}>
+    <div className={compact ? "mb-4" : "mb-6"}>
       <p
-        className={`text-[11px] font-bold uppercase tracking-[0.3em] text-red-500 ${
+        className={`text-[11px] font-bold uppercase tracking-[0.25em] text-[#22D3EE] ${
           compact ? "mb-1" : "mb-2"
         }`}
       >
         {eyebrow}
       </p>
-      <h1 className={`font-extrabold tracking-tight ${compact ? "text-2xl" : "text-2xl sm:text-3xl"}`}>
+      <h1 className={`font-black tracking-tight text-white ${compact ? "text-2xl" : "text-2xl sm:text-3xl"}`}>
         {title}
       </h1>
       {text && (
-        <p className={`break-words text-sm text-gray-400 ${compact ? "mt-1 leading-5" : "mt-2 leading-6"}`}>
+        <p className={`break-words text-sm text-slate-400 ${compact ? "mt-1 leading-5" : "mt-2 leading-6"}`}>
           {text}
         </p>
       )}
@@ -150,9 +162,10 @@ export function FormError({ message }) {
   return (
     <p
       role="alert"
-      className="mt-2 rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-2.5 text-sm leading-6 text-red-300"
+      className="mt-3 flex items-center gap-2 rounded-xl border border-red-500/30 bg-red-500/10 px-3.5 py-2.5 text-xs font-medium leading-5 text-red-300"
     >
-      {message}
+      <CircleAlert size={16} className="shrink-0 text-red-400" />
+      <span>{message}</span>
     </p>
   );
 }
@@ -160,7 +173,7 @@ export function FormError({ message }) {
 export function InfoBox({ message }) {
   if (!message) return null;
   return (
-    <p className="mb-4 rounded-lg border border-green-500/30 bg-green-500/10 px-3 py-2 text-sm text-green-300">
+    <p className="mb-4 rounded-xl border border-[#22D3EE]/30 bg-[#22D3EE]/10 px-3.5 py-2.5 text-xs font-medium text-[#22D3EE]">
       {message}
     </p>
   );
@@ -182,7 +195,7 @@ export function Field({
     <div className="group">
       <label
         htmlFor={id}
-        className={`block text-sm font-medium text-gray-300 group-focus-within:text-red-400 ${
+        className={`block text-xs font-semibold tracking-wide text-slate-300 transition-colors group-focus-within:text-[#22D3EE] ${
           compact ? "mb-1" : "mb-1.5"
         }`}
       >
@@ -191,7 +204,7 @@ export function Field({
       <div className="relative">
         <Icon
           size={18}
-          className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 group-focus-within:text-red-500"
+          className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 transition-colors group-focus-within:text-[#8B5CF6]"
         />
         <input
           id={id}
@@ -221,7 +234,7 @@ export function PasswordToggle({ show, onToggle }) {
       type="button"
       onClick={onToggle}
       aria-label={show ? "Hide password" : "Show password"}
-      className="absolute right-2 top-1/2 -translate-y-1/2 rounded-md p-2 text-gray-400 transition-colors hover:bg-red-500/10 hover:text-red-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500"
+      className="absolute right-2 top-1/2 -translate-y-1/2 rounded-lg p-2 text-slate-400 transition-colors hover:text-[#22D3EE] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8B5CF6]"
     >
       {show ? <EyeOff size={18} /> : <Eye size={18} />}
     </button>
@@ -235,7 +248,6 @@ export function OtpInput({ value, onChange, disabled, error }) {
 
   const focusBox = (i) => refs.current[Math.max(0, Math.min(5, i))]?.focus();
 
-  // Focus the first box on mount and again whenever the code is cleared (e.g. after a wrong code)
   useEffect(() => {
     if (!value && !disabled) focusBox(0);
   }, [value, disabled]);
@@ -291,15 +303,18 @@ export function OtpInput({ value, onChange, disabled, error }) {
             onKeyDown={(e) => handleKeyDown(i, e)}
             onPaste={handlePaste}
             onMouseDown={(e) => {
-              // clicking a box past the filled ones lands on the first empty box (no gaps)
               if (i > value.length) {
                 e.preventDefault();
                 focusBox(value.length);
               }
             }}
             onFocus={(e) => e.target.select()}
-            className={`auth-input relative h-12 w-0 min-w-0 max-w-[3rem] flex-1 rounded-lg border bg-transparent p-0 text-center text-xl font-bold text-white caret-red-500 outline-none transition-all duration-200 ease-out hover:z-10 hover:-translate-y-0.5 hover:scale-105 hover:border-red-500 hover:bg-red-500/10 hover:shadow-lg hover:shadow-red-600/30 focus:z-10 focus:-translate-y-0.5 focus:scale-105 focus:border-red-500 focus:ring-2 focus:ring-red-500/30 disabled:cursor-not-allowed disabled:opacity-60 motion-reduce:transform-none ${
-              error ? "border-red-500" : value[i] ? "border-red-500/70 bg-red-500/10" : "border-white/25"
+            className={`auth-input relative h-11 w-0 min-w-0 max-w-[3rem] flex-1 rounded-lg border bg-[#111827] p-0 text-center text-lg font-bold text-white caret-[#22D3EE] outline-none transition-colors duration-150 disabled:cursor-not-allowed disabled:opacity-60 ${
+              error
+                ? "border-red-500"
+                : value[i]
+                ? "border-[#8B5CF6] text-[#22D3EE]"
+                : "border-white/15 focus:border-[#8B5CF6]"
             }`}
           />
         ))}

@@ -82,8 +82,6 @@ export default function Login() {
         localStorage.setItem("refreshToken", refreshToken);
       }
 
-      // Always save the user, even when the server sends no name.
-      // The Navbar and Profile page build the name from the email.
       const profile = { ...userData };
       delete profile.accessToken;
       delete profile.refreshToken;
@@ -168,10 +166,10 @@ export default function Login() {
           }
         />
 
-        <div className="-mt-1 mb-1 text-right">
+        <div className="-mt-1 mb-2 text-right">
           <Link
             to="/forgot-password"
-            className="text-sm text-gray-300 transition-colors hover:text-red-400 hover:underline"
+            className="text-xs font-semibold text-slate-400 transition-colors hover:text-[#22D3EE] hover:underline underline-offset-4"
           >
             Forgot password?
           </Link>
@@ -186,7 +184,7 @@ export default function Login() {
         >
           {loading ? (
             <>
-              <LoaderCircle size={19} className="animate-spin" />
+              <LoaderCircle size={19} className="animate-spin text-[#22D3EE]" />
               Signing in...
             </>
           ) : (
@@ -195,9 +193,9 @@ export default function Login() {
         </button>
       </form>
 
-      <p className="mt-6 text-center text-sm text-gray-400">
+      <p className="mt-6 text-center text-sm text-slate-400">
         New to Netflix?
-        <Link to="/register" className={`ml-1 ${linkBtn}`}>
+        <Link to="/register" className={`ml-1.5 ${linkBtn}`}>
           Sign up now
         </Link>
       </p>

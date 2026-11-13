@@ -34,7 +34,6 @@ const ACCOUNT_LINKS = [
   { label: "Change Password", to: "/change-password", icon: LockKeyhole, words: "change password security" },
 ];
 
-// variant: "desktop" (centered bar with dropdown) | "mobile" (inside the 3-bar panel)
 export default function NavSearch({ variant = "desktop", onDone }) {
   const navigate = useNavigate();
   const isMobile = variant === "mobile";
@@ -55,7 +54,7 @@ export default function NavSearch({ variant = "desktop", onDone }) {
   const q = query.trim();
   const ql = q.toLowerCase();
 
-  /* ---- real trending titles for the animated placeholder ---- */
+  /* Real trending titles for the animated placeholder */
   useEffect(() => {
     const controller = new AbortController();
     fetch(requests.trending, { signal: controller.signal })
@@ -68,7 +67,7 @@ export default function NavSearch({ variant = "desktop", onDone }) {
     return () => controller.abort();
   }, []);
 
-  /* ---- rotate placeholder names ---- */
+  /* Rotate placeholder names */
   useEffect(() => {
     let swap;
     const timer = setInterval(() => {
@@ -84,7 +83,7 @@ export default function NavSearch({ variant = "desktop", onDone }) {
     };
   }, [titles]);
 
-  /* ---- focus on mobile, outside click + Escape on desktop ---- */
+  /* Focus on mobile, outside click + Escape on desktop */
   useEffect(() => {
     if (isMobile) inputRef.current?.focus();
   }, [isMobile]);
@@ -102,17 +101,20 @@ export default function NavSearch({ variant = "desktop", onDone }) {
     };
   }, []);
 
-  /* ---- debounced TMDB search ---- */
+  /* Debounced TMDB search */
   useEffect(() => {
     if (q.length < 2) {
-      setResults([]);
-      setSearching(false);
-      setError("");
-      return;
+      const timer = setTimeout(() => {
+        setResults([]);
+        setSearching(false);
+        setError("");
+      }, 0);
+      return () => clearTimeout(timer);
     }
+
     const controller = new AbortController();
-    setSearching(true);
-    const timer = setTimeout(async () => {
+    const setSearchingTimer = setTimeout(() => setSearching(true), 0);
+    const searchTimer = setTimeout(async () => {
       try {
         const data = await searchMulti(q, controller.signal);
         setResults(
@@ -132,13 +134,15 @@ export default function NavSearch({ variant = "desktop", onDone }) {
         if (!controller.signal.aborted) setSearching(false);
       }
     }, 350);
+
     return () => {
-      clearTimeout(timer);
+      clearTimeout(setSearchingTimer);
+      clearTimeout(searchTimer);
       controller.abort();
     };
   }, [q]);
 
-  /* ---- profile-related matches ---- */
+  /* Profile-related matches */
   const user = getUser();
   const accountMatches = useMemo(() => {
     if (!user || ql.length < 2) return [];
@@ -160,7 +164,6 @@ export default function NavSearch({ variant = "desktop", onDone }) {
       .slice(0, 3);
   }, [user?.name, ql]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  /* ---- navigation: results open the trailer page directly ---- */
   const go = (to) => {
     setQuery("");
     setResults([]);
@@ -194,8 +197,8 @@ export default function NavSearch({ variant = "desktop", onDone }) {
     <div
       className={
         isMobile
-          ? "mt-3 max-h-[60vh] overflow-y-auto overscroll-contain"
-          : "absolute left-0 right-0 top-full z-30 mt-2 max-h-[70vh] overflow-y-auto overscroll-contain rounded-lg border border-white/15 bg-[#111]/95 p-2 shadow-2xl backdrop-blur-md"
+          ? "mt-3 max-h-[60vh] overflow-y-auto overscroll-contain rounded-xl border border-white/10 bg-[#111827]/95 p-2 shadow-2xl backdrop-blur-xl"
+          : "absolute left-0 right-0 top-full z-30 mt-2 max-h-[70vh] overflow-y-auto overscroll-contain rounded-xl border border-white/10 bg-[#111827]/95 p-2 shadow-[0_15px_50px_rgba(0,0,0,0.8),0_0_25px_rgba(139,92,246,0.15)] backdrop-blur-2xl"
       }
     >
       {listMatches.length > 0 && (
@@ -236,20 +239,20 @@ export default function NavSearch({ variant = "desktop", onDone }) {
         <Group title="Your account">
           {accountMatches.map((l) => (
             <ResultRow key={l.label} onClick={() => go(l.to)}>
-              <l.icon size={18} className="shrink-0 text-gray-300" />
-              <span className="truncate text-sm">{l.label}</span>
+              <l.icon size={18} className="shrink-0 text-[#22D3EE]" />
+              <span className="truncate text-sm font-medium">{l.label}</span>
             </ResultRow>
           ))}
         </Group>
       )}
 
-      {error && <p className="px-3 py-4 text-sm text-red-400">{error}</p>}
+      {error && <p className="px-3 py-4 text-sm text-[#8B5CF6]">{error}</p>}
       {searching && !results.length && !accountMatches.length && !listMatches.length && (
-        <p className="px-3 py-4 text-sm text-gray-400">Searching...</p>
+        <p className="px-3 py-4 text-sm text-slate-400">Searching catalog...</p>
       )}
       {nothingFound && (
-        <p className="px-3 py-4 text-sm text-gray-400">
-          No results for “{q}”. Check the spelling or try another title.
+        <p className="px-3 py-4 text-sm text-slate-400">
+          No results for “{q}”. Try another keyword or movie title.
         </p>
       )}
     </div>
@@ -258,8 +261,8 @@ export default function NavSearch({ variant = "desktop", onDone }) {
   return (
     <div ref={wrapRef} className="relative w-full">
       <form onSubmit={onSubmit} role="search">
-        <div className="flex h-10 w-full items-center gap-2 rounded border border-white/40 bg-transparent px-3 focus-within:border-white">
-          <Search size={17} className="shrink-0 text-gray-300" />
+        <div className="group relative flex h-10 w-full items-center gap-2.5 rounded-xl border border-white/10 bg-[#111827]/70 px-3.5 backdrop-blur-md transition-all duration-300 hover:border-white/20 focus-within:border-[#8B5CF6] focus-within:shadow-[0_0_20px_rgba(139,92,246,0.3)]">
+          <Search size={16} className="shrink-0 text-slate-400 transition-colors group-focus-within:text-[#22D3EE]" />
 
           <div className="relative h-full min-w-0 flex-1">
             <input
@@ -273,20 +276,21 @@ export default function NavSearch({ variant = "desktop", onDone }) {
               aria-label="Search movies, shows and your profile"
               autoComplete="off"
               enterKeyHint="search"
-              className="h-full w-full bg-transparent text-base text-white outline-none md:text-sm"
+              className="h-full w-full bg-transparent text-sm text-white outline-none placeholder:text-transparent"
             />
             {!query && (
               <span
                 aria-hidden="true"
-                className={`pointer-events-none absolute inset-y-0 left-0 right-0 flex items-center truncate text-sm text-gray-400 transition-opacity duration-200 ${phVisible ? "opacity-100" : "opacity-0"
-                  }`}
+                className={`pointer-events-none absolute inset-y-0 left-0 right-0 flex items-center truncate text-sm text-slate-400 transition-opacity duration-200 ${
+                  phVisible ? "opacity-100" : "opacity-0"
+                }`}
               >
-                {titles[idx % titles.length]}
+                Search titles e.g. <span className="ml-1 text-[#22D3EE] font-medium">{titles[idx % titles.length]}</span>
               </span>
             )}
           </div>
 
-          {searching && <LoaderCircle size={16} className="shrink-0 animate-spin text-gray-300" />}
+          {searching && <LoaderCircle size={16} className="shrink-0 animate-spin text-[#22D3EE]" />}
           {query && (
             <button
               type="button"
@@ -295,9 +299,9 @@ export default function NavSearch({ variant = "desktop", onDone }) {
                 inputRef.current?.focus();
               }}
               aria-label="Clear search"
-              className="shrink-0 text-gray-300 hover:text-white"
+              className="shrink-0 rounded-full p-0.5 text-slate-400 transition-colors hover:text-white hover:bg-white/10"
             >
-              <X size={17} />
+              <X size={15} />
             </button>
           )}
         </div>
@@ -308,10 +312,9 @@ export default function NavSearch({ variant = "desktop", onDone }) {
   );
 }
 
-/* ---------- small helpers ---------- */
 const Group = ({ title, children }) => (
-  <div className="mb-1">
-    <p className="px-3 pb-1 pt-2 text-xs font-semibold text-gray-500">{title}</p>
+  <div className="mb-1.5">
+    <p className="px-3 pb-1 pt-2 text-[11px] font-bold uppercase tracking-wider text-[#22D3EE]">{title}</p>
     {children}
   </div>
 );
@@ -320,14 +323,14 @@ const ResultRow = ({ children, onClick }) => (
   <button
     type="button"
     onClick={onClick}
-    className="flex w-full items-center gap-3 rounded-md px-3 py-2 text-left text-white transition-colors hover:bg-white/10 focus-visible:bg-white/10 focus-visible:outline-none"
+    className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left text-white transition-all hover:bg-[#8B5CF6]/20 hover:shadow-[0_0_12px_rgba(139,92,246,0.15)] focus-visible:bg-[#8B5CF6]/20 focus-visible:outline-none"
   >
     {children}
   </button>
 );
 
 const Thumb = ({ src, person, tv }) => (
-  <span className="flex h-14 w-10 shrink-0 items-center justify-center overflow-hidden rounded bg-[#222] text-gray-500">
+  <span className="flex h-14 w-10 shrink-0 items-center justify-center overflow-hidden rounded-md border border-white/10 bg-[#1e293b] text-slate-400">
     {src ? (
       <img src={src} alt="" loading="lazy" className="h-full w-full object-cover" />
     ) : person ? (
@@ -342,7 +345,7 @@ const Thumb = ({ src, person, tv }) => (
 
 const Meta = ({ title, sub }) => (
   <span className="min-w-0 flex-1">
-    <span className="block truncate text-sm font-medium">{title}</span>
-    <span className="block truncate text-xs text-gray-400">{sub}</span>
+    <span className="block truncate text-sm font-semibold text-slate-100">{title}</span>
+    <span className="block truncate text-xs text-slate-400">{sub}</span>
   </span>
 );

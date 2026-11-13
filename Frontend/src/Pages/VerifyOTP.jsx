@@ -17,7 +17,7 @@ import {
 export default function VerifyOTP() {
   const navigate = useNavigate();
   const location = useLocation();
-  const flow = authFlow.get(); // { mode: "register" | "reset", email, token }
+  const flow = authFlow.get();
 
   const [otp, setOtp] = useState("");
   const [error, setError] = useState("");
@@ -31,7 +31,6 @@ export default function VerifyOTP() {
     return () => clearTimeout(timer);
   }, [cooldown]);
 
-  // Opened directly without registering / requesting a reset
   if (!flow?.token) return <Navigate to="/login" replace />;
 
   const isReset = flow.mode === "reset";
@@ -53,7 +52,6 @@ export default function VerifyOTP() {
           setOtp("");
           return setError("Invalid reset code. Please try again.");
         }
-        // the same token is used on the reset-password page
         authFlow.save({ ...flow, verified: true });
         navigate("/reset-password", { replace: true });
       } else {
@@ -74,7 +72,7 @@ export default function VerifyOTP() {
   const handleChange = (value) => {
     setOtp(value);
     setError("");
-    if (value.length === 6) verify(value); // submits as soon as the 6th digit is entered
+    if (value.length === 6) verify(value);
   };
 
   const handleResend = async () => {
@@ -114,10 +112,10 @@ export default function VerifyOTP() {
       >
         <OtpInput value={otp} onChange={handleChange} disabled={loading} error={error} />
 
-        <button type="submit" disabled={loading || otp.length !== 6} className={`${primaryBtn} mt-2`}>
+        <button type="submit" disabled={loading || otp.length !== 6} className={`${primaryBtn} mt-3`}>
           {loading ? (
             <>
-              <LoaderCircle size={19} className="animate-spin" />
+              <LoaderCircle size={19} className="animate-spin text-[#22D3EE]" />
               Verifying...
             </>
           ) : isReset ? (
@@ -128,12 +126,12 @@ export default function VerifyOTP() {
         </button>
       </form>
 
-      <div className="mt-5 flex flex-wrap items-center justify-between gap-3 text-sm">
+      <div className="mt-6 flex flex-wrap items-center justify-between gap-3 text-xs sm:text-sm">
         <button
           type="button"
           onClick={handleResend}
           disabled={cooldown > 0}
-          className="text-gray-300 transition-colors hover:text-red-400 hover:underline disabled:cursor-not-allowed disabled:text-gray-600 disabled:no-underline"
+          className="font-medium text-slate-300 transition-colors hover:text-[#22D3EE] hover:underline underline-offset-4 disabled:cursor-not-allowed disabled:text-slate-600 disabled:no-underline"
         >
           {cooldown > 0 ? `Resend code in ${cooldown}s` : "Resend code"}
         </button>
@@ -143,7 +141,7 @@ export default function VerifyOTP() {
             authFlow.clear();
             navigate("/login");
           }}
-          className="text-gray-300 transition-colors hover:text-white hover:underline"
+          className="font-medium text-slate-400 transition-colors hover:text-white hover:underline underline-offset-4"
         >
           Back to sign in
         </button>

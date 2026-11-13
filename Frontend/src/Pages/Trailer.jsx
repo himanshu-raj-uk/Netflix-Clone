@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useLocation, useParams } from "react-router-dom";
-import { Loader2, ExternalLink } from "lucide-react";
+import { Loader2, ExternalLink, Star } from "lucide-react";
 import Navbar from "../Components/Navbar";
 import Footer from "../Components/Footer";
 import requests from "../Library/Tmdb";
@@ -36,8 +36,6 @@ export default function Trailer() {
   useEffect(() => {
     let cancelled = false;
 
-    setStatus("loading");
-    setVideoKey(null);
     window.scrollTo({ top: 0, behavior: "instant" });
 
     (async () => {
@@ -94,13 +92,14 @@ export default function Trailer() {
         ? `${TMDB_IMAGE}${movie.poster_path}`
         : null;
 
-    setBackgroundLoaded(false);
-    setBackdrop(currentBackdrop);
+    const timer = setTimeout(() => {
+      if (!cancelled) setBackdrop(currentBackdrop);
+    }, 0);
 
     if (!apiKey) {
-      console.error("VITE_TMDB_API_KEY is missing.");
       return () => {
         cancelled = true;
+        clearTimeout(timer);
       };
     }
 
@@ -166,7 +165,7 @@ export default function Trailer() {
   }, [id, mediaType, movie?.backdrop_path, movie?.poster_path]);
 
   return (
-    <div className="flex min-h-screen flex-col bg-[#080808] text-white">
+    <div className="flex min-h-screen flex-col bg-[#080B14] text-white">
       <Navbar />
 
       <main className="relative isolate flex-1 overflow-hidden">
@@ -174,8 +173,8 @@ export default function Trailer() {
           <div
             key={backdrop}
             aria-hidden="true"
-            className={`pointer-events-none absolute inset-0 -z-20 bg-cover bg-center transition-opacity duration-700 ${
-              backgroundLoaded ? "opacity-45" : "opacity-0"
+            className={`pointer-events-none absolute inset-0 -z-20 bg-cover bg-center transition-opacity duration-1000 ${
+              backgroundLoaded ? "opacity-35" : "opacity-0"
             }`}
             style={{ backgroundImage: `url("${backdrop}")` }}
           >
@@ -189,47 +188,52 @@ export default function Trailer() {
           </div>
         )}
 
+        {/* Ambient Spotlights */}
         <div
           aria-hidden="true"
-          className="pointer-events-none absolute inset-0 -z-10 bg-gradient-to-b from-black/65 via-[#080808]/80 to-[#080808]"
+          className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(ellipse_at_top,rgba(139,92,246,0.2)_0%,transparent_60%)]"
         />
-
         <div
           aria-hidden="true"
-          className="pointer-events-none absolute inset-0 -z-10 bg-gradient-to-r from-black/45 via-transparent to-black/45"
+          className="pointer-events-none absolute inset-0 -z-10 bg-gradient-to-b from-[#080B14]/70 via-[#080B14]/85 to-[#080B14]"
         />
 
-        <section className="mx-auto flex w-full max-w-[1440px] flex-col items-center px-4 pb-5 pt-24 text-center sm:px-6 sm:pb-7 sm:pt-28 md:px-8 md:pb-9 md:pt-32 lg:px-12">
+        <section className="mx-auto flex w-full max-w-[1440px] flex-col items-center px-4 pb-8 pt-24 text-center sm:px-6 sm:pb-12 sm:pt-28 md:px-10 md:pt-32 lg:px-12">
           {title && (
-            <div className="mb-4 flex w-full flex-col items-center sm:mb-6 md:mb-7">
-              <h1 className="max-w-5xl break-words text-balance text-2xl font-extrabold leading-tight tracking-tight drop-shadow-lg sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl">
+            <div className="mb-6 flex w-full flex-col items-center sm:mb-8">
+              <h1 className="max-w-5xl break-words text-balance text-2xl font-black leading-tight tracking-tight drop-shadow-lg sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl">
                 {title}
               </h1>
 
-              <div className="mt-2 flex flex-wrap items-center justify-center gap-x-3 gap-y-1.5 text-xs text-white/80 sm:mt-3 sm:gap-x-4 sm:text-sm md:text-base">
+              <div className="mt-3 flex flex-wrap items-center justify-center gap-x-3 gap-y-1.5 text-xs text-slate-300 sm:mt-4 sm:gap-x-4 sm:text-sm">
                 {movie?.vote_average > 0 && (
-                  <span className="font-bold text-green-400">
+                  <span className="flex items-center gap-1 font-bold text-[#22D3EE]">
+                    <Star size={13} className="fill-[#22D3EE] text-[#22D3EE]" />
                     {Math.round(movie.vote_average * 10)}% {t.match}
                   </span>
                 )}
 
                 {year && <span>{year}</span>}
 
-                <span className="rounded border border-white/40 px-2 py-0.5 text-[10px] font-semibold tracking-wider sm:text-xs">
-                  HD
+                <span className="rounded border border-[#8B5CF6]/50 bg-[#8B5CF6]/15 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-[#22D3EE]">
+                  4K HDR
+                </span>
+                <span className="rounded border border-white/20 px-2 py-0.5 text-[10px] font-semibold text-slate-300">
+                  5.1 Audio
                 </span>
               </div>
 
               {movie?.overview && (
-                <p className="mt-3 max-w-3xl text-pretty text-sm leading-relaxed text-white/85 sm:mt-4 sm:text-base md:text-lg">
+                <p className="mt-4 max-w-3xl text-pretty text-sm leading-relaxed text-slate-300 sm:text-base md:text-lg">
                   {movie.overview}
                 </p>
               )}
             </div>
           )}
 
-          <div className="relative w-full overflow-hidden rounded-lg border border-white/15 bg-black shadow-[0_10px_40px_rgba(0,0,0,0.65),0_0_25px_rgba(229,9,20,0.12)]">
-            <div className="relative aspect-video w-full">
+          {/* Cinema Frame */}
+          <div className="relative w-full max-w-5xl overflow-hidden rounded-xl border border-white/10 bg-[#111827] shadow-2xl">
+            <div className="relative aspect-video w-full bg-[#080B14]">
               {status === "ready" && (
                 <iframe
                   title={title || "Trailer"}
@@ -241,17 +245,17 @@ export default function Trailer() {
               )}
 
               {status === "loading" && (
-                <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-black/70 px-4">
-                  <Loader2 className="h-7 w-7 animate-spin text-red-600 sm:h-9 sm:w-9" />
-                  <span className="text-sm text-white/75 sm:text-base">
+                <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-[#080B14]/80 px-4">
+                  <Loader2 className="h-8 w-8 animate-spin text-[#8B5CF6]" />
+                  <span className="text-sm font-semibold text-[#22D3EE]">
                     {t.loading}
                   </span>
                 </div>
               )}
 
               {(status === "empty" || status === "error") && (
-                <div className="absolute inset-0 flex items-center justify-center bg-black/75 px-5">
-                  <p className="max-w-md text-sm leading-relaxed text-white/75 sm:text-base md:text-lg">
+                <div className="absolute inset-0 flex items-center justify-center bg-[#080B14]/80 px-5">
+                  <p className="max-w-md text-sm leading-relaxed text-slate-300 sm:text-base md:text-lg">
                     {status === "empty" ? t.notFound : t.error}
                   </p>
                 </div>
@@ -264,10 +268,10 @@ export default function Trailer() {
               href={`https://www.youtube.com/watch?v=${videoKey}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="group mt-4 inline-flex min-h-10 items-center justify-center gap-2 rounded-md border border-white/30 bg-black/40 px-4 py-2 text-sm font-semibold text-white shadow-lg backdrop-blur-sm transition-all duration-300 hover:border-red-600 hover:bg-red-600 hover:shadow-[0_0_22px_rgba(229,9,20,0.4)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 active:scale-[0.98] sm:mt-5 sm:min-h-11 sm:px-6 sm:text-base md:mt-6"
+              className="mt-5 inline-flex h-10 items-center justify-center gap-2 rounded-md bg-[#8B5CF6] px-5 text-xs font-semibold text-white transition-colors duration-200 hover:bg-[#7C3AED] active:scale-95 sm:h-11 sm:px-6 sm:text-sm"
             >
               <span>{t.watchOnYoutube}</span>
-              <ExternalLink className="h-4 w-4 shrink-0 transition-transform duration-300 group-hover:-translate-y-0.5 group-hover:translate-x-0.5 sm:h-[18px] sm:w-[18px]" />
+              <ExternalLink className="h-4 w-4 shrink-0" />
             </a>
           )}
         </section>

@@ -53,7 +53,6 @@ export default function Register() {
     const email = normalizeEmail(formData.email);
     const { phone, password, confirmPassword } = formData;
 
-    // Same rules as the backend Joi registerSchema
     const next = { ...EMPTY_ERRORS };
     if (!name) next.name = "Please enter your name.";
     else if (name.length < 3) next.name = "Name must be at least 3 characters.";
@@ -76,13 +75,11 @@ export default function Register() {
     setErrors(EMPTY_ERRORS);
 
     try {
-      // Email is new -> backend saves the pending user and sends the OTP
       const response = await AuthAPI.registerUser({ name, email, password, phone });
       goToOtp(response.data?.verificationToken, response.data?.data?.email || email);
     } catch (error) {
       const data = error.response?.data;
 
-      // Saved, but the OTP email failed -> continue; user can resend on the next page
       if (error.response?.status === 503 && data?.verificationToken) {
         return goToOtp(data.verificationToken, data.data?.email || email, data.message);
       }
@@ -195,10 +192,10 @@ export default function Register() {
 
         <FormError message={errors.form} />
 
-        <button type="submit" disabled={loading} className={`${primaryBtn.replace("h-12", "h-11")} mt-2`}>
+        <button type="submit" disabled={loading} className={`${primaryBtn.replace("h-12", "h-11")} mt-3`}>
           {loading ? (
             <>
-              <LoaderCircle size={19} className="animate-spin" />
+              <LoaderCircle size={19} className="animate-spin text-[#22D3EE]" />
               Creating account...
             </>
           ) : (
@@ -207,9 +204,9 @@ export default function Register() {
         </button>
       </form>
 
-      <p className="mt-4 text-center text-sm text-gray-400">
+      <p className="mt-5 text-center text-sm text-slate-400">
         Already have an account?
-        <Link to="/login" className={`ml-1 ${linkBtn}`}>
+        <Link to="/login" className={`ml-1.5 ${linkBtn}`}>
           Sign in
         </Link>
       </p>

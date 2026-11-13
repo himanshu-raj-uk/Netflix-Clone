@@ -52,7 +52,7 @@ export default function ForgotPassword() {
             const message = getMessage(error, "Unable to send the code. Please try again.");
 
             if (isRouteNotFound(error)) {
-                // Backend problem, not a wrong email
+                
                 setErrors({
                     email: "",
                     form: "Password reset is not available right now (server route not found).",

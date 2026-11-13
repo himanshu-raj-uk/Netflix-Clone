@@ -18,10 +18,8 @@ function useVisibleCount() {
 
   useEffect(() => {
     const handleResize = () => setCount(getVisibleCount(window.innerWidth));
-
     handleResize();
     window.addEventListener("resize", handleResize);
-
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
@@ -34,16 +32,15 @@ const CARD_STYLE = {
 };
 
 const ROW_VARS =
-  "[--gap:0.4rem] [--tg:1] sm:[--gap:clamp(0.5rem,0.8vw,0.85rem)] sm:[--tg:0]";
+  "[--gap:0.5rem] [--tg:1] sm:[--gap:clamp(0.6rem,0.9vw,1rem)] sm:[--tg:0]";
 
 const TILE_WITH =
   "[--tile:0px] sm:[--tile:clamp(4rem,4vw+1rem,6rem)]";
 
 const TILE_NONE = "[--tile:0px]";
 
-// Mobile: smaller fixed size. sm and up: same fluid size as before.
 const TITLE =
-  "text-[1.05rem] font-semibold leading-tight text-white sm:text-[clamp(1.1rem,0.9vw+0.85rem,1.6rem)]";
+  "text-[1.1rem] font-bold tracking-tight text-white sm:text-[clamp(1.2rem,0.9vw+0.9rem,1.7rem)]";
 
 export default function Row({
   title,
@@ -71,22 +68,22 @@ export default function Row({
   const visibleMovies = list.slice(0, shownCount);
   const hasMore = shownCount < list.length;
 
-  // Mobile: first row is pulled up under the banner, other rows sit close together.
-  // sm and up: unchanged.
   const sectionSpacing = isFirstRow
-    ? "-mt-10 pt-0 sm:-mt-12 md:-mt-14 lg:-mt-16"
-    : "mt-1 pt-0 sm:mt-3 md:mt-4";
+    ? "-mt-8 pt-0 sm:-mt-10 md:-mt-12 lg:-mt-14"
+    : "mt-4 pt-0 sm:mt-6 md:mt-8";
 
-  const sectionClass = `relative z-10 w-full px-4 pb-0 sm:px-6 sm:pb-2 md:px-10 lg:px-16 ${sectionSpacing}`;
+  const sectionClass = `relative z-10 w-full px-4 pb-1 sm:px-8 sm:pb-3 md:px-12 lg:px-16 ${sectionSpacing}`;
 
   useEffect(() => {
-    setPages(1);
-    setIsExpanding(false);
-    previousPages.current = 1;
-
-    if (scroller.current) {
-      scroller.current.scrollLeft = 0;
-    }
+    const timer = setTimeout(() => {
+      setPages(1);
+      setIsExpanding(false);
+      previousPages.current = 1;
+      if (scroller.current) {
+        scroller.current.scrollLeft = 0;
+      }
+    }, 0);
+    return () => clearTimeout(timer);
   }, [fetchUrl, language]);
 
   useEffect(() => {
@@ -101,7 +98,6 @@ export default function Row({
 
   useEffect(() => {
     const element = scroller.current;
-
     if (!element) return;
 
     if (pages > previousPages.current) {
@@ -116,7 +112,6 @@ export default function Row({
 
   const loadMore = useCallback(() => {
     if (isExpanding || !hasMore) return;
-
     setIsExpanding(true);
     setPages((current) => current + 1);
   }, [isExpanding, hasMore]);
@@ -124,14 +119,17 @@ export default function Row({
   if (loading) {
     return (
       <section className={sectionClass}>
-        <div className="mb-2 h-6 w-36 animate-pulse rounded bg-white/10 sm:mb-3 sm:h-7 sm:w-40" />
+        <div className="mb-3 flex items-center gap-2">
+          <div className="h-5 w-1.5 rounded-full bg-[#8B5CF6]/50 animate-pulse" />
+          <div className="h-6 w-44 animate-pulse rounded-lg bg-[#111827] sm:h-7 sm:w-52" />
+        </div>
 
         <div className="flex gap-2 overflow-hidden sm:gap-4">
           {Array.from({ length: Math.max(MIN_POSTERS, count) }).map(
             (_, index) => (
               <div
                 key={index}
-                className="aspect-[2/3] w-[42vw] shrink-0 animate-pulse rounded-md bg-white/10 sm:w-[24vw] md:w-[19vw] lg:w-[15vw]"
+                className="aspect-[2/3] w-[42vw] shrink-0 animate-pulse rounded-xl border border-white/[0.04] bg-[#111827] sm:w-[24vw] md:w-[19vw] lg:w-[15vw]"
               />
             )
           )}
@@ -144,7 +142,7 @@ export default function Row({
     return (
       <section className={sectionClass}>
         <h2 className={TITLE}>{heading}</h2>
-        <p className="mt-2 text-xs text-gray-400 sm:mt-3 sm:text-sm">
+        <p className="mt-2 text-xs text-slate-400 sm:mt-3 sm:text-sm">
           Unable to load movies right now.
         </p>
       </section>
@@ -155,7 +153,9 @@ export default function Row({
 
   return (
     <section className={sectionClass}>
-      <div className="relative z-0 mb-1 sm:mb-4">
+      {/* Category Heading with cinematic accent bar */}
+      <div className="relative z-0 mb-2 flex items-center gap-2.5 sm:mb-4">
+        <span className="h-4 w-1 rounded-full bg-gradient-to-b from-[#8B5CF6] to-[#22D3EE] shadow-[0_0_8px_rgba(139,92,246,0.5)] sm:h-5 sm:w-1.5" />
         <h2 className={TITLE}>{heading}</h2>
       </div>
 
@@ -163,8 +163,9 @@ export default function Row({
         <div
           ref={scroller}
           style={{ "--n": count }}
-          className={`relative flex items-stretch gap-[var(--gap)] overflow-x-auto overflow-y-hidden scroll-smooth px-1 py-1 sm:py-2 md:py-3 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden ${ROW_VARS} ${hasMore ? TILE_WITH : TILE_NONE
-            }`}
+          className={`relative flex items-stretch gap-[var(--gap)] overflow-x-auto overflow-y-hidden scroll-smooth px-1 py-1 sm:py-2 md:py-3 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden ${ROW_VARS} ${
+            hasMore ? TILE_WITH : TILE_NONE
+          }`}
         >
           {visibleMovies.map((movie) => (
             <div
@@ -176,6 +177,7 @@ export default function Row({
             </div>
           ))}
 
+          {/* Load More Button at end of carousel */}
           {hasMore && (
             <div className="flex w-12 shrink-0 items-center justify-center sm:w-16 md:w-20">
               <button
@@ -183,24 +185,21 @@ export default function Row({
                 aria-label="View more movies"
                 disabled={isExpanding}
                 onClick={loadMore}
-                className={`group/more relative flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-full border-0 text-white transition-[background-color,transform,box-shadow] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] hover:scale-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-500 active:scale-95 disabled:cursor-wait sm:h-10 sm:w-10 md:h-11 md:w-11 ${isExpanding
-                    ? "bg-red-600 shadow-[0_0_18px_rgba(229,9,20,0.35)]"
-                    : "bg-white/15 hover:bg-green-600 hover:shadow-[0_0_18px_rgba(34,197,94,0.3)]"
-                  }`}
+                className={`relative flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-white/20 bg-[#111827] text-white transition-colors duration-200 hover:border-[#8B5CF6] hover:bg-[#8B5CF6]/20 active:scale-95 disabled:cursor-wait sm:h-10 sm:w-10 ${
+                  isExpanding ? "border-[#22D3EE] text-[#22D3EE]" : ""
+                }`}
               >
                 <Plus
-                  className={`absolute h-5 w-5 transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] ${isExpanding
-                      ? "rotate-90 scale-50 opacity-0"
-                      : "rotate-0 scale-100 opacity-100"
-                    }`}
+                  className={`absolute h-4 w-4 transition-transform duration-300 ${
+                    isExpanding ? "rotate-90 scale-50 opacity-0" : "rotate-0 scale-100 opacity-100 text-white"
+                  }`}
                   strokeWidth={2}
                 />
 
                 <Check
-                  className={`absolute h-5 w-5 transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] ${isExpanding
-                      ? "rotate-0 scale-100 opacity-100"
-                      : "-rotate-90 scale-50 opacity-0"
-                    }`}
+                  className={`absolute h-4 w-4 transition-transform duration-300 ${
+                    isExpanding ? "rotate-0 scale-100 opacity-100 text-[#22D3EE]" : "-rotate-90 scale-50 opacity-0"
+                  }`}
                   strokeWidth={2.5}
                 />
               </button>
