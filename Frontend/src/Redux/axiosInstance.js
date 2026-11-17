@@ -1,8 +1,13 @@
 import axios from "axios";
 
+const rawBaseURL =
+  import.meta.env.VITE_API_URL || "https://netflix-clone-qjtd.onrender.com";
+const baseURL = String(rawBaseURL).trim().replace(/\/+$/, "");
+
 const axiosInstance = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || "http://localhost:8000",
+  baseURL,
   withCredentials: true,
+  timeout: 30000,
 });
 
 axiosInstance.interceptors.request.use(
@@ -49,8 +54,10 @@ axiosInstance.interceptors.response.use(
 
       window.dispatchEvent(new Event("userLogout"));
 
-      if (window.location.pathname !== "/login") {
-        window.location.href = "/login";
+      const base = import.meta.env.BASE_URL || "/";
+      const targetLogin = `${base.replace(/\/$/, "")}/login`;
+      if (!window.location.pathname.endsWith("/login")) {
+        window.location.href = targetLogin;
       }
     }
 

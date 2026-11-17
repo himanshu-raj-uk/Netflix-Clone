@@ -61,6 +61,8 @@ const register = async (req, res, next) => {
       otpExpire: new Date(Date.now() + 5 * 60 * 1000),
     });
 
+    console.log(`[REGISTER OTP for ${pendingUser.email}]:`, otp);
+
     const token = jwt.sign(
       { id: pendingUser._id.toString(), type: "verify-email", role: "user" },
       process.env.JWT_SECRET,

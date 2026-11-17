@@ -281,14 +281,24 @@ const resendOTPService = async (token) => {
 
             await pendingUser.save();
 
-            await sendEmail({
-                to: pendingUser.email,
-                subject: "Your New OTP - Netflix Clone",
-                html: emailTemplate({
-                    heading: `Hello ${pendingUser.name}`,
-                    message: otpEmailBody(otp, "Your new OTP is:"),
-                }),
-            });
+            console.log(`[RESEND OTP for ${pendingUser.email}]:`, otp);
+
+            try {
+                await sendEmail({
+                    to: pendingUser.email,
+                    subject: "Your New OTP - Netflix Clone",
+                    html: emailTemplate({
+                        heading: `Hello ${pendingUser.name}`,
+                        message: otpEmailBody(otp, "Your new OTP is:"),
+                    }),
+                });
+            } catch (mailErr) {
+                console.error("Email send error on resend OTP:", mailErr.message);
+                throw new ApiError(
+                    503,
+                    "Unable to send OTP email right now. Please try again shortly.",
+                );
+            }
 
             return true;
         }
@@ -307,14 +317,24 @@ const resendOTPService = async (token) => {
 
             await user.save();
 
-            await sendEmail({
-                to: user.email,
-                subject: "Password Reset OTP - Netflix Clone",
-                html: emailTemplate({
-                    heading: `Hello ${user.name}`,
-                    message: otpEmailBody(otp, "Your new password reset OTP is:"),
-                }),
-            });
+            console.log(`[RESET OTP for ${user.email}]:`, otp);
+
+            try {
+                await sendEmail({
+                    to: user.email,
+                    subject: "Password Reset OTP - Netflix Clone",
+                    html: emailTemplate({
+                        heading: `Hello ${user.name}`,
+                        message: otpEmailBody(otp, "Your new password reset OTP is:"),
+                    }),
+                });
+            } catch (mailErr) {
+                console.error("Email send error on reset OTP:", mailErr.message);
+                throw new ApiError(
+                    503,
+                    "Unable to send reset OTP email right now. Please try again shortly.",
+                );
+            }
 
             return true;
         }
