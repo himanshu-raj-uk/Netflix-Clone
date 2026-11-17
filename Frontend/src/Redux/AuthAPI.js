@@ -51,7 +51,6 @@ export const resetPassword = (password, resetToken) => {
   );
 };
 
-
 export const resendOTP = (token) => {
   return axiosInstance.post(
     "/user/resend-otp",
@@ -72,11 +71,9 @@ export const updateUserProfile = (formData) => {
   return axiosInstance.put("/user/update-profile", formData);
 };
 
-
 export const logoutUser = () => {
   return axiosInstance.post("/user/logout");
 };
-
 
 export const getMovieLists = async () => {
   const response = await axiosInstance.get("/user/movie-lists");
@@ -88,10 +85,9 @@ export const addMovieToList = async (listType, movieId, movie) => {
     throw new Error("Invalid movie list.");
   }
 
-  const response = await axiosInstance.post(
-    `/user/${listType}/${movieId}`,
-    { movie }
-  );
+  const response = await axiosInstance.post(`/user/${listType}/${movieId}`, {
+    movie,
+  });
 
   return response.data;
 };
@@ -101,9 +97,7 @@ export const removeMovieFromList = async (listType, movieId) => {
     throw new Error("Invalid movie list.");
   }
 
-  const response = await axiosInstance.delete(
-    `/user/${listType}/${movieId}`
-  );
+  const response = await axiosInstance.delete(`/user/${listType}/${movieId}`);
 
   return response.data;
 };

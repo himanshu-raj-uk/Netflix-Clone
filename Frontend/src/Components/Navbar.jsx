@@ -275,6 +275,7 @@ export default function Navbar() {
         <div className="flex items-center gap-5">
           <Link
             to="/"
+            replace={location.pathname !== "/"}
             aria-label="Netflix Home"
             className="flex shrink-0 items-center transition-transform duration-200 hover:scale-105"
           >
@@ -291,6 +292,7 @@ export default function Navbar() {
               <>
                 <Link
                   to="/watchlist"
+                  replace={location.pathname !== "/"}
                   className={`rounded-md px-3 py-1.5 text-xs font-semibold tracking-wide transition-colors ${
                     location.pathname === "/watchlist"
                       ? "text-[#22D3EE]"
@@ -301,6 +303,7 @@ export default function Navbar() {
                 </Link>
                 <Link
                   to="/likelist"
+                  replace={location.pathname !== "/"}
                   className={`rounded-md px-3 py-1.5 text-xs font-semibold tracking-wide transition-colors ${
                     location.pathname === "/likelist"
                       ? "text-[#22D3EE]"
@@ -331,6 +334,7 @@ export default function Navbar() {
           {user ? (
             <Link
               to="/profile"
+              replace={location.pathname !== "/"}
               aria-label="Open your profile"
               className="flex h-8 min-w-0 items-center gap-1.5 rounded-full p-0.5 pr-2 text-white transition-colors hover:bg-white/10 sm:h-9 sm:gap-2 sm:pr-3"
             >
@@ -384,6 +388,7 @@ export default function Navbar() {
                 <div className="flex items-center gap-2 sm:gap-3">
                   <Link
                     to="/watchlist"
+                    replace={location.pathname !== "/"}
                     onClick={() => setMobileOpen(false)}
                     className="rounded-md px-2 py-1 transition hover:text-[#22D3EE]"
                   >
@@ -391,6 +396,7 @@ export default function Navbar() {
                   </Link>
                   <Link
                     to="/likelist"
+                    replace={location.pathname !== "/"}
                     onClick={() => setMobileOpen(false)}
                     className="rounded-md px-2 py-1 transition hover:text-[#22D3EE]"
                   >
@@ -398,6 +404,7 @@ export default function Navbar() {
                   </Link>
                   <Link
                     to="/profile"
+                    replace={location.pathname !== "/"}
                     onClick={() => setMobileOpen(false)}
                     className="rounded-md px-2 py-1 transition hover:text-[#8B5CF6]"
                   >

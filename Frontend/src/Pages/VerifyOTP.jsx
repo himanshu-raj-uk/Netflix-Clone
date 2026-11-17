@@ -92,8 +92,8 @@ export default function VerifyOTP() {
 
   return (
     <AuthLayout>
-      <BackLink to={isReset ? "/forgot-password" : "/register"}>
-        {isReset ? "Change email" : "Back to sign up"}
+      <BackLink to="/" replace>
+        Back to home
       </BackLink>
 
       <Heading

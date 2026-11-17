@@ -47,7 +47,7 @@ export default function ForgotPassword() {
             }
 
             authFlow.save({ mode: "reset", email: value, token });
-            navigate("/verify-otp", { state: { message: "Reset code sent to your email." } });
+            navigate("/verify-otp", { replace: true, state: { message: "Reset code sent to your email." } });
         } catch (error) {
             const message = getMessage(error, "Unable to send the code. Please try again.");
 

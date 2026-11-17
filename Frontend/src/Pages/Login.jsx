@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { LoaderCircle, Mail, LockKeyhole } from "lucide-react";
 import * as AuthAPI from "../Redux/AuthAPI";
@@ -23,11 +23,27 @@ export default function Login() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const [formData, setFormData] = useState({ email: "", password: "" });
+  const [formData, setFormData] = useState(() => ({
+    email: location.state?.email || sessionStorage.getItem("loginEmail") || "",
+    password: "",
+  }));
+
   const [errors, setErrors] = useState(EMPTY_ERRORS);
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const info = location.state?.message || "";
+
+  useEffect(() => {
+    const incomingEmail =
+      location.state?.email || sessionStorage.getItem("loginEmail");
+
+    if (incomingEmail) {
+      setFormData((prev) => ({
+        ...prev,
+        email: incomingEmail,
+      }));
+    }
+  }, [location.key, location.state]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -71,10 +87,7 @@ export default function Login() {
       }
 
       const userData =
-        result.user ||
-        result.userData ||
-        result.profile ||
-        result;
+        result.user || result.userData || result.profile || result;
 
       localStorage.setItem("userToken", accessToken);
 
@@ -87,7 +100,7 @@ export default function Login() {
       delete profile.refreshToken;
       localStorage.setItem(
         "user",
-        JSON.stringify({ ...profile, email: profile.email || email })
+        JSON.stringify({ ...profile, email: profile.email || email }),
       );
 
       window.dispatchEvent(new Event("auth-changed"));
@@ -95,10 +108,7 @@ export default function Login() {
       navigate("/", { replace: true });
     } catch (error) {
       const status = error.response?.status;
-      const message = getMessage(
-        error,
-        "Unable to sign in. Please try again."
-      );
+      const message = getMessage(error, "Unable to sign in. Please try again.");
 
       if (status === 404) {
         setErrors({

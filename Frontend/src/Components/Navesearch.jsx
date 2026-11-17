@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import {
   Search,
   X,
@@ -36,6 +36,7 @@ const ACCOUNT_LINKS = [
 
 export default function NavSearch({ variant = "desktop", onDone }) {
   const navigate = useNavigate();
+  const location = useLocation();
   const isMobile = variant === "mobile";
 
   const [query, setQuery] = useState("");
@@ -169,7 +170,8 @@ export default function NavSearch({ variant = "desktop", onDone }) {
     setResults([]);
     setOpen(false);
     onDone?.();
-    navigate(to);
+    const isTargetSecondary = ["/watchlist", "/likelist", "/profile", "/change-password"].includes(to);
+    navigate(to, { replace: isTargetSecondary && location.pathname !== "/" });
   };
 
   const watchPath = (r) => {

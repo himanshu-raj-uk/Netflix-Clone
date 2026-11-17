@@ -123,10 +123,11 @@ export function AuthLayout({ children, wide = false }) {
   );
 }
 
-export function BackLink({ to, children = "Back to sign in" }) {
+export function BackLink({ to, replace = false, children = "Back to sign in" }) {
   return (
     <Link
       to={to}
+      replace={replace}
       className="mb-5 inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-slate-400 transition-colors hover:text-[#22D3EE]"
     >
       <ArrowLeft size={15} />

@@ -42,7 +42,7 @@ export default function Register() {
 
   const goToOtp = (token, email, message = "") => {
     authFlow.save({ mode: "register", email, token });
-    navigate("/verify-otp", { state: { message } });
+    navigate("/verify-otp", { replace: true, state: { message } });
   };
 
   const handleRegister = async (e) => {

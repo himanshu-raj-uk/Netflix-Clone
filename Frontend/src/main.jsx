@@ -11,7 +11,7 @@ import "./App.css";
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
     <Provider store={store}>
-      <BrowserRouter basename="/Netflix-Clone">
+      <BrowserRouter basename="/Netflix-Clone/">
         <LanguageProvider>
           <App />
         </LanguageProvider>

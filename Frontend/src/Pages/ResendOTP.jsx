@@ -44,7 +44,7 @@ export default function ResendOTP() {
 
   return (
     <AuthLayout>
-      <BackLink to="/verify-otp">Back to code entry</BackLink>
+      <BackLink to="/" replace>Back to home</BackLink>
 
       <Heading
         eyebrow="Verify email"

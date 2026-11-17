@@ -71,7 +71,7 @@ export default function ChangePassword() {
 
     return (
         <AuthLayout>
-            <BackLink to="/">Back to home</BackLink>
+            <BackLink to="/" replace>Back to home</BackLink>
 
             <Heading
                 eyebrow="Security"
