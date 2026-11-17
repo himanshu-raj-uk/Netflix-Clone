@@ -55,8 +55,12 @@ app.use((req, res) => {
 
 // ---------- Error handler (must be last) ----------
 app.use((err, req, res, next) => {
-    console.error(err.message);
-    res.status(err.status || 500).json({ message: err.message || "Server error" });
+    const statusCode = err.statusCode || err.status || 500;
+    console.error(`[Error ${statusCode}]:`, err.message);
+    res.status(statusCode).json({
+        status: false,
+        message: err.message || "Server error",
+    });
 });
 
 // ---------- Start ----------
