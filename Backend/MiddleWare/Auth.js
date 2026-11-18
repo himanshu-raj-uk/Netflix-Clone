@@ -69,7 +69,7 @@ const roleAuth = (...roles) => {
 const storage = new CloudinaryStorage({
   cloudinary,
   params: {
-    folder: "all-services",
+    folder: "netflix-clone",
     allowed_formats: ["jpg", "jpeg", "png", "webp"],
   },
 });

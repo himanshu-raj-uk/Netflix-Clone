@@ -78,7 +78,11 @@ export default function ResetPassword() {
     <AuthLayout>
       <BackLink to="/login" />
 
-      <Heading eyebrow="Almost done" title="New Password" text="Choose a new password for your account." />
+      <Heading
+        eyebrow="Almost done"
+        title="New Password"
+        text="Choose a new password for your account."
+      />
 
       <form onSubmit={handleSubmit} noValidate>
         <Field
@@ -92,7 +96,12 @@ export default function ResetPassword() {
           onChange={handleChange}
           disabled={loading}
           error={errors.password}
-          right={<PasswordToggle show={showPassword} onToggle={() => setShowPassword((p) => !p)} />}
+          right={
+            <PasswordToggle
+              show={showPassword}
+              onToggle={() => setShowPassword((p) => !p)}
+            />
+          }
         />
         <Field
           id="confirmPassword"
@@ -109,10 +118,14 @@ export default function ResetPassword() {
 
         <FormError message={errors.form} />
 
-        <button type="submit" disabled={loading} className={`${primaryBtn} mt-4`}>
+        <button
+          type="submit"
+          disabled={loading}
+          className={`${primaryBtn} mt-3.5`}
+        >
           {loading ? (
             <>
-              <LoaderCircle size={19} className="animate-spin" />
+              <LoaderCircle size={18} className="animate-spin text-[#22D3EE]" />
               Saving...
             </>
           ) : (

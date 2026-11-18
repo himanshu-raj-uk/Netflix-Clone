@@ -17,7 +17,14 @@ import {
   primaryBtn,
 } from "./AuthUI";
 
-const EMPTY_ERRORS = { name: "", email: "", phone: "", password: "", confirmPassword: "", form: "" };
+const EMPTY_ERRORS = {
+  name: "",
+  email: "",
+  phone: "",
+  password: "",
+  confirmPassword: "",
+  form: "",
+};
 
 export default function Register() {
   const navigate = useNavigate();
@@ -56,18 +63,21 @@ export default function Register() {
     const next = { ...EMPTY_ERRORS };
     if (!name) next.name = "Please enter your name.";
     else if (name.length < 3) next.name = "Name must be at least 3 characters.";
-    else if (name.length > 50) next.name = "Name must be 50 characters or less.";
+    else if (name.length > 50)
+      next.name = "Name must be 50 characters or less.";
 
     if (!email) next.email = "Please enter your email address.";
     else if (!isEmail(email)) next.email = "Enter a valid email address.";
 
-    if (!/^[0-9]{10}$/.test(phone)) next.phone = "Enter a valid 10-digit mobile number.";
+    if (!/^[0-9]{10}$/.test(phone))
+      next.phone = "Enter a valid 10-digit mobile number.";
 
     if (!password) next.password = "Please create a password.";
     else if (password.length < 6 || password.length > 20)
       next.password = "Password must be 6 to 20 characters.";
 
-    if (confirmPassword !== password) next.confirmPassword = "Passwords do not match.";
+    if (confirmPassword !== password)
+      next.confirmPassword = "Passwords do not match.";
 
     if (Object.values(next).some(Boolean)) return setErrors(next);
 
@@ -75,16 +85,31 @@ export default function Register() {
     setErrors(EMPTY_ERRORS);
 
     try {
-      const response = await AuthAPI.registerUser({ name, email, password, phone });
-      goToOtp(response.data?.verificationToken, response.data?.data?.email || email);
+      const response = await AuthAPI.registerUser({
+        name,
+        email,
+        password,
+        phone,
+      });
+      goToOtp(
+        response.data?.verificationToken,
+        response.data?.data?.email || email,
+      );
     } catch (error) {
       const data = error.response?.data;
 
       if (error.response?.status === 503 && data?.verificationToken) {
-        return goToOtp(data.verificationToken, data.data?.email || email, data.message);
+        return goToOtp(
+          data.verificationToken,
+          data.data?.email || email,
+          data.message,
+        );
       }
 
-      const message = getMessage(error, "Unable to create your account. Please try again.");
+      const message = getMessage(
+        error,
+        "Unable to create your account. Please try again.",
+      );
       const field = fieldFromMessage(message, {
         phone: /mobile|phone/i,
         email: /email/i,
@@ -93,9 +118,18 @@ export default function Register() {
       });
 
       if (field === "email" && /already|registered|exist/i.test(message)) {
-        setErrors({ ...EMPTY_ERRORS, email: "This email is already registered. Please sign in." });
-      } else if (field === "phone" && /already|registered|exist/i.test(message)) {
-        setErrors({ ...EMPTY_ERRORS, phone: "This mobile number is already registered." });
+        setErrors({
+          ...EMPTY_ERRORS,
+          email: "This email is already registered. Please sign in.",
+        });
+      } else if (
+        field === "phone" &&
+        /already|registered|exist/i.test(message)
+      ) {
+        setErrors({
+          ...EMPTY_ERRORS,
+          phone: "This mobile number is already registered.",
+        });
       } else {
         setErrors({ ...EMPTY_ERRORS, [field]: message });
       }
@@ -104,7 +138,12 @@ export default function Register() {
     }
   };
 
-  const toggle = <PasswordToggle show={showPassword} onToggle={() => setShowPassword((p) => !p)} />;
+  const toggle = (
+    <PasswordToggle
+      show={showPassword}
+      onToggle={() => setShowPassword((p) => !p)}
+    />
+  );
 
   return (
     <AuthLayout wide>
@@ -115,8 +154,8 @@ export default function Register() {
         text="Sign up to start watching your favorite movies and shows."
       />
 
-      <form onSubmit={handleRegister} noValidate>
-        <div className="grid grid-cols-1 gap-x-4 sm:grid-cols-2">
+      <form onSubmit={handleRegister} noValidate className="mt-1">
+        <div className="grid grid-cols-1 gap-x-3 sm:grid-cols-2">
           <Field
             compact
             id="name"
@@ -160,7 +199,7 @@ export default function Register() {
           error={errors.email}
         />
 
-        <div className="grid grid-cols-1 gap-x-4 sm:grid-cols-2">
+        <div className="grid grid-cols-1 gap-x-3 sm:grid-cols-2">
           <Field
             compact
             id="password"
@@ -168,7 +207,7 @@ export default function Register() {
             icon={LockKeyhole}
             type={showPassword ? "text" : "password"}
             autoComplete="new-password"
-            placeholder="Create a password"
+            placeholder="Create password"
             value={formData.password}
             onChange={handleChange}
             disabled={loading}
@@ -192,10 +231,14 @@ export default function Register() {
 
         <FormError message={errors.form} />
 
-        <button type="submit" disabled={loading} className={`${primaryBtn.replace("h-12", "h-11")} mt-3`}>
+        <button
+          type="submit"
+          disabled={loading}
+          className={`${primaryBtn} mt-2.5`}
+        >
           {loading ? (
             <>
-              <LoaderCircle size={19} className="animate-spin text-[#22D3EE]" />
+              <LoaderCircle size={18} className="animate-spin text-[#22D3EE]" />
               Creating account...
             </>
           ) : (
@@ -204,7 +247,7 @@ export default function Register() {
         </button>
       </form>
 
-      <p className="mt-5 text-center text-sm text-slate-400">
+      <p className="mt-4 text-center text-xs sm:text-sm text-slate-400">
         Already have an account?
         <Link to="/login" className={`ml-1.5 ${linkBtn}`}>
           Sign in

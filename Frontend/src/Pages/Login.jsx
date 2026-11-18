@@ -179,7 +179,7 @@ export default function Login() {
         <div className="-mt-1 mb-2 text-right">
           <Link
             to="/forgot-password"
-            className="text-xs font-semibold text-slate-400 transition-colors hover:text-[#22D3EE] hover:underline underline-offset-4"
+            className="text-[11px] sm:text-xs font-semibold text-slate-400 transition-colors hover:text-[#22D3EE] hover:underline underline-offset-4"
           >
             Forgot password?
           </Link>
@@ -190,11 +190,11 @@ export default function Login() {
         <button
           type="submit"
           disabled={loading}
-          className={`${primaryBtn} mt-4`}
+          className={`${primaryBtn} mt-3.5`}
         >
           {loading ? (
             <>
-              <LoaderCircle size={19} className="animate-spin text-[#22D3EE]" />
+              <LoaderCircle size={18} className="animate-spin text-[#22D3EE]" />
               Signing in...
             </>
           ) : (
@@ -203,7 +203,7 @@ export default function Login() {
         </button>
       </form>
 
-      <p className="mt-6 text-center text-sm text-slate-400">
+      <p className="mt-5 text-center text-xs sm:text-sm text-slate-400">
         New to Netflix?
         <Link to="/register" className={`ml-1.5 ${linkBtn}`}>
           Sign up now

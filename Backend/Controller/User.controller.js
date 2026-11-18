@@ -17,39 +17,26 @@ const {
 
 const { AccessToken, RefreshToken } = require("../Config/Token");
 
-
 // USER REGISTER
 
 const register = async (req, res, next) => {
   try {
     const { name, email, password, phone } = req.body;
-
     const normalizedEmail = email.toLowerCase();
 
-    const existingEmail = await User.findOne({
-      email: normalizedEmail,
-    });
+    const existingEmail = await User.findOne({ email: normalizedEmail });
+    if (existingEmail) throw new ApiError(400, "Email is already registered");
 
-    if (existingEmail) {
-      throw new ApiError(400, "Email is already registered");
-    }
-
-    const existingPhone = await User.findOne({
-      phone,
-    });
-
-    if (existingPhone) {
+    const existingPhone = await User.findOne({ phone });
+    if (existingPhone)
       throw new ApiError(400, "Mobile number is already registered");
-    }
 
     const hashPassword = await bcrypt.hash(password, 10);
-
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
-
     const hashOtp = await bcrypt.hash(otp, 10);
 
     await PendingUser.deleteOne({
-      email: normalizedEmail,
+      $or: [{ email: normalizedEmail }, { phone }],
     });
 
     const pendingUser = await PendingUser.create({
@@ -61,218 +48,68 @@ const register = async (req, res, next) => {
       otpExpire: new Date(Date.now() + 5 * 60 * 1000),
     });
 
-    console.log(`[REGISTER OTP for ${pendingUser.email}]:`, otp);
-
     const token = jwt.sign(
       { id: pendingUser._id.toString(), type: "verify-email", role: "user" },
       process.env.JWT_SECRET,
       { expiresIn: "10m" },
     );
 
-    let emailSent = false;
-
-    for (let attempt = 1; attempt <= 2; attempt++) {
-      try {
-        await sendEmail({
-          to: pendingUser.email,
-          subject: "Welcome to Netflix Clone",
-          html: emailTemplate({
-            heading: `Hello ${pendingUser.name}`,
-            message: `
-              <div style="text-align: center;">
-                <p style="margin: 0 0 12px; font-size: 15px; line-height: 1.6;">
-                  Your registration has been received successfully.
-                </p>
-
-                <p style="margin: 0 0 10px; font-size: 15px; font-weight: 600;">
-                  Your OTP is:
-                </p>
-
-                <div style="margin: 18px 0; text-align: center;">
-                  <span style="
-                    display: inline-block;
-                    font-size: 28px;
-                    font-weight: 700;
-                    letter-spacing: 8px;
-                    line-height: 1.4;
-                  ">
-                    ${otp}
-                  </span>
-                </div>
-
-                <p style="margin: 0; font-size: 14px; line-height: 1.6;">
-                  This OTP is valid for <strong>5 minutes</strong>.
-                </p>
-
-                <p style="margin: 22px 0 0; font-size: 14px; line-height: 1.6;">
-                  Regards,<br>
-                  <strong>Netflix Clone</strong>
-                </p>
-              </div>
-            `,
-          }),
-        });
-
-        emailSent = true;
-
-        break;
-      } catch (emailError) {
-        console.error("OTP EMAIL ERROR:", emailError);
-        if (attempt < 2) {
-          await new Promise((resolve) => setTimeout(resolve, 2000));
-        }
-      }
-    }
-
-    if (!emailSent) {
-      return res.status(503).json({
-        status: false,
-        message:
-          "Registration saved, but OTP email could not be sent. Please try Resend OTP.",
-        verificationToken: token,
-        data: {
-          email: pendingUser.email,
-        },
-      });
-    }
-
-    return res.status(201).json({
+    // Respond immediately — don't make the user wait on the email round-trip
+    res.status(201).json({
       status: true,
       message: "OTP sent successfully.",
       verificationToken: token,
-      data: {
-        email: pendingUser.email,
-      },
+      data: { email: pendingUser.email },
+    });
+
+    sendEmail({
+      to: pendingUser.email,
+      subject: "Your Netflix Clone verification code",
+      html: emailTemplate({
+        heading: `Hello ${pendingUser.name},`,
+        message: `
+      <p style="margin:0 0 24px; color:#cbd5e1; font-size:16px; line-height:28px;">
+        Thanks for signing up. Use the code below to verify your email address and finish creating your account.
+      </p>
+
+      <table width="100%" cellpadding="0" cellspacing="0" border="0" role="presentation" style="margin:0 0 24px;">
+        <tr>
+          <td align="center" bgcolor="#111827" style="padding:2px; background:#111827; border-radius:14px;">
+            <table width="100%" cellpadding="0" cellspacing="0" border="0" role="presentation">
+              <tr>
+                <td align="center" style="padding:28px 20px; border-radius:12px; background:#0B1120;">
+
+                  <p style="margin:0 0 14px; font-size:11px; font-weight:700; letter-spacing:2.5px; text-transform:uppercase; color:#22D3EE;">
+                    Your Verification Code
+                  </p>
+
+                  <div style="color:#f8fafc; font-size:36px; font-weight:800; letter-spacing:12px; font-family:'Courier New',Courier,monospace; padding-left:12px;">
+                    ${otp}
+                  </div>
+
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+      </table>
+
+      <p style="margin:0 0 6px; color:#94a3b8; font-size:14px; line-height:24px;">
+        This code expires in <strong style="color:#e2e8f0;">5 minutes</strong>.
+      </p>
+
+      <p style="margin:0; color:#64748b; font-size:13px; line-height:22px;">
+        If you didn't request this, you can safely ignore this email.
+      </p>
+    `,
+      }),
+    }).catch((emailError) => {
+      console.error("OTP EMAIL ERROR (background):", emailError.message);
     });
   } catch (err) {
     next(err);
   }
 };
-
-// USER REGISTER BY GOOGLE
-
-// const googleLogin = async (req, res, next) => {
-//   try {
-//     const { credential } = req.body;
-
-//     if (!credential) {
-//       throw new ApiError(400, "Google authentication credential is required");
-//     }
-
-//     if (!process.env.GOOGLE_CLIENT_ID) {
-//       console.error("GOOGLE_CLIENT_ID is missing from server environment");
-
-//       throw new ApiError(500, "Google authentication is not configured");
-//     }
-
-//     const ticket = await googleClient.verifyIdToken({
-//       idToken: credential,
-//       audience: process.env.GOOGLE_CLIENT_ID,
-//     });
-
-//     const payload = ticket.getPayload();
-
-//     if (!payload) {
-//       throw new ApiError(401, "Invalid Google authentication");
-//     }
-
-//     const {
-//       sub: googleId,
-//       email,
-//       email_verified: emailVerified,
-//       name,
-//       picture,
-//     } = payload;
-
-//     if (!googleId || !email) {
-//       throw new ApiError(401, "Google account information is incomplete");
-//     }
-
-//     if (!emailVerified) {
-//       throw new ApiError(401, "Google email is not verified");
-//     }
-
-//     const normalizedEmail = email.toLowerCase();
-
-//     let user = await User.findOne({
-//       email: normalizedEmail,
-//     });
-
-//     if (user?.isBlocked) {
-//       throw new ApiError(403, "Your account has been blocked");
-//     }
-
-//     if (!user) {
-//       user = await User.create({
-//         name: name || "Google User",
-//         email: normalizedEmail,
-//         googleId,
-//         authProvider: "google",
-//         isVerified: true,
-//         profileImage: {
-//           url: picture || "",
-//           public_id: "",
-//         },
-//       });
-//     } else {
-//       if (user.googleId && user.googleId !== googleId) {
-//         throw new ApiError(401, "Google account does not match this email");
-//       }
-
-//       user.googleId = googleId;
-//       user.isVerified = true;
-
-//       if (!user.authProvider) {
-//         user.authProvider = "google";
-//       }
-
-//       if (!user.name && name) {
-//         user.name = name;
-//       }
-
-//       if (picture && (!user.profileImage || !user.profileImage.url)) {
-//         user.profileImage = {
-//           url: picture,
-//           public_id: "",
-//         };
-//       }
-
-//       await user.save();
-//     }
-
-//     const accessToken = AccessToken(user);
-//     const refreshToken = RefreshToken(user);
-
-//     user.refreshToken = refreshToken;
-
-//     await user.save();
-
-//     const profileCompleted = Boolean(user.phone) && Boolean(user.password);
-
-//     return res.status(200).json({
-//       status: true,
-//       message: "Google sign-in successful",
-//       data: {
-//         user: {
-//           id: user._id,
-//           name: user.name,
-//           email: user.email,
-//           phone: user.phone || "",
-//           role: user.role,
-//           isVerified: user.isVerified,
-//           authProvider: user.authProvider,
-//           profileCompleted,
-//         },
-//         accessToken,
-//         refreshToken,
-//       },
-//     });
-//   } catch (err) {
-//     console.error("GOOGLE LOGIN ERROR:", err.message);
-
-//     next(err);
-//   }
-// };
 
 // USER LOGIN
 
@@ -345,7 +182,6 @@ const verifyOTP = async (req, res, next) => {
       : authHeader;
 
     const { otp } = req.body;
-    console.log(otp, "this otp is valid for 5 min")
 
     const user = await verifyOTPService(token, String(otp));
 
@@ -381,11 +217,15 @@ const verifyOTP = async (req, res, next) => {
 
 const ResendOtp = async (req, res, next) => {
   try {
-    const token = req.header("Authorization");
+    const authHeader = req.header("Authorization");
 
-    if (!token) {
+    if (!authHeader) {
       throw new ApiError(401, "Verification token required");
     }
+
+    const token = authHeader.startsWith("Bearer ")
+      ? authHeader.split(" ")[1]
+      : authHeader;
 
     await resendOTPService(token, "user");
 
@@ -553,7 +393,14 @@ const updateProfile = async (req, res, next) => {
       return next(new ApiError(400, "Valid email is required"));
     if (user.authProvider !== "google" && !/^\d{10}$/.test(clean.phone || ""))
       return next(new ApiError(400, "Phone must be 10 digits"));
-    for (const key of ["fullName", "houseNo", "area", "city", "state", "country"]) {
+    for (const key of [
+      "fullName",
+      "houseNo",
+      "area",
+      "city",
+      "state",
+      "country",
+    ]) {
       if (!clean.address[key])
         return next(new ApiError(400, `Address ${key} is required`));
     }
@@ -566,36 +413,35 @@ const updateProfile = async (req, res, next) => {
     user.name = clean.name;
     user.email = clean.email;
     if (clean.phone) user.phone = clean.phone;
-    user.address = clean.address;
+    user.address = clean.address;  
+
+    console.log("FILE RECEIVED:", req.file);
+
+    console.log("REMOVE IMAGE:", removeImage);
 
     // image: replace or remove
     if (req.file || removeImage === "true") {
       if (user.profileImage?.public_id) {
         try {
           await cloudinary.uploader.destroy(user.profileImage.public_id);
-        } catch (e) {
-          console.log("OLD IMAGE DELETE ERROR:", e.message);
+        } catch (error) {
+          console.error("OLD IMAGE DELETE ERROR:", error.message);
         }
       }
+
       user.profileImage = { url: "", public_id: "" };
     }
 
     if (req.file) {
-      const result = await new Promise((resolve, reject) => {
-        cloudinary.uploader
-          .upload_stream(
-            { folder: "Netflix-Clone/profiles", resource_type: "image" },
-            (err, r) => (err ? reject(err) : resolve(r))
-          )
-          .end(req.file.buffer);
-      });
-      user.profileImage = { url: result.secure_url, public_id: result.public_id };
+      user.profileImage = {
+        url: req.file.path,
+        public_id: req.file.filename,
+      };
     }
-
     await user.save();
 
     const updatedUser = await User.findById(user._id).select(
-      "-password -otp -refreshToken"
+      "-password -otp -refreshToken",
     );
 
     res.status(200).json({

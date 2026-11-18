@@ -455,6 +455,7 @@ function MovieListSection({
 
 function UpdateProfilePanel({ onSaved, onClose }) {
   const fileRef = useRef(null);
+  const imageFileRef = useRef(null);
 
   const [form, setForm] = useState(EMPTY_FORM);
   const [isGoogle, setIsGoogle] = useState(false);
@@ -533,30 +534,36 @@ function UpdateProfilePanel({ onSaved, onClose }) {
     setSuccess("");
   };
 
-  const pickImage = (event) => {
-    const file = event.target.files?.[0];
-    event.target.value = "";
+ const pickImage = (event) => {
+   const input = event.currentTarget;
+   const file = input.files?.[0];
 
-    if (!file) return;
+   if (!file) return;
 
-    if (!file.type.startsWith("image/")) {
-      setError("Please choose an image file.");
-      return;
-    }
+   if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) {
+     setError("Please select a JPG, PNG, or WebP image.");
+     input.value = "";
+     return;
+   }
 
-    if (file.size > MAX_IMAGE_SIZE) {
-      setError("Image must be under 2MB.");
-      return;
-    }
+   if (file.size > MAX_IMAGE_SIZE) {
+     setError("Image must be under 2MB.");
+     input.value = "";
+     return;
+   }
 
-    setImageFile(file);
-    setRemoveImage(false);
-    setImageUrl(URL.createObjectURL(file));
-    setError("");
-    setSuccess("");
-  };
+   imageFileRef.current = file;
+   setImageFile(file);
+   setRemoveImage(false);
+   setImageUrl(URL.createObjectURL(file));
+   setError("");
+   setSuccess("");
+
+   input.value = "";
+ };
 
   const clearImage = () => {
+    imageFileRef.current = null;
     setImageFile(null);
     setImageUrl("");
     setRemoveImage(true);
@@ -613,10 +620,11 @@ function UpdateProfilePanel({ onSaved, onClose }) {
       }),
     );
 
-    if (imageFile) {
-      formData.append("profileImage", imageFile);
-    }
+    const selectedImage = imageFileRef.current || imageFile;
 
+    if (selectedImage) {
+      formData.append("profileImage", selectedImage, selectedImage.name);
+    }
     if (removeImage) {
       formData.append("removeImage", "true");
     }
@@ -642,6 +650,7 @@ function UpdateProfilePanel({ onSaved, onClose }) {
         fillForm(updated);
       }
 
+      imageFileRef.current = null;
       setImageFile(null);
       setRemoveImage(false);
 

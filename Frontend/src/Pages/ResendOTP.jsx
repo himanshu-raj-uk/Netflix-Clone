@@ -44,7 +44,9 @@ export default function ResendOTP() {
 
   return (
     <AuthLayout>
-      <BackLink to="/" replace>Back to home</BackLink>
+      <BackLink to="/" replace>
+        Back to home
+      </BackLink>
 
       <Heading
         eyebrow="Verify email"
@@ -54,10 +56,15 @@ export default function ResendOTP() {
 
       <FormError message={error} />
 
-      <button type="button" onClick={handleResend} disabled={loading} className={`${primaryBtn} mt-4`}>
+      <button
+        type="button"
+        onClick={handleResend}
+        disabled={loading}
+        className={`${primaryBtn} mt-3.5`}
+      >
         {loading ? (
           <>
-            <LoaderCircle size={19} className="animate-spin" />
+            <LoaderCircle size={18} className="animate-spin text-[#22D3EE]" />
             Sending code...
           </>
         ) : (

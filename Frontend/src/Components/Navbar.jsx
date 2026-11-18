@@ -20,9 +20,14 @@ const MOBILE_SEARCH =
   "[&_[role=listbox]]:bg-[#111827] [&_ul]:bg-[#111827]";
 
 const initials = (name) => {
-  const p = String(name || "").trim().split(/\s+/).filter(Boolean);
+  const p = String(name || "")
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean);
   if (!p.length) return "";
-  return (p.length === 1 ? p[0].slice(0, 2) : p[0][0] + p[p.length - 1][0]).toUpperCase();
+  return (
+    p.length === 1 ? p[0].slice(0, 2) : p[0][0] + p[p.length - 1][0]
+  ).toUpperCase();
 };
 
 function Avatar({ user, className = "" }) {
@@ -54,7 +59,9 @@ function MenuIcon({ open }) {
     <span aria-hidden className="relative block h-4 w-5">
       <span
         className={`${bar} ${
-          open ? "top-1/2 -translate-y-1/2 rotate-45 bg-[#22D3EE]" : "top-0 translate-y-0 rotate-0"
+          open
+            ? "top-1/2 -translate-y-1/2 rotate-45 bg-[#22D3EE]"
+            : "top-0 translate-y-0 rotate-0"
         }`}
       />
       <span
@@ -118,8 +125,12 @@ function LanguageMenu({ language, onChange, t, align = "right" }) {
         }`}
       >
         <Globe size={14} className="shrink-0 text-[#22D3EE]" />
-        <span className="whitespace-nowrap sm:hidden">{current === "hi" ? "हिं" : "EN"}</span>
-        <span className="hidden whitespace-nowrap sm:inline">{labelOf(currentItem)}</span>
+        <span className="whitespace-nowrap sm:hidden">
+          {current === "hi" ? "हिं" : "EN"}
+        </span>
+        <span className="hidden whitespace-nowrap sm:inline">
+          {labelOf(currentItem)}
+        </span>
         <ChevronDown
           size={14}
           className={`shrink-0 text-slate-400 transition-transform duration-200 ${
@@ -132,7 +143,9 @@ function LanguageMenu({ language, onChange, t, align = "right" }) {
         role="listbox"
         aria-label={t?.language?.label || "Language"}
         className={`absolute ${
-          align === "left" ? "left-0 origin-top-left" : "right-0 origin-top-right"
+          align === "left"
+            ? "left-0 origin-top-left"
+            : "right-0 origin-top-right"
         } top-full z-50 mt-1.5 min-w-[7.5rem] overflow-hidden rounded-lg border border-white/10 bg-[#111827] p-1 shadow-xl transition-all duration-200 ease-out ${
           open
             ? "visible translate-y-0 scale-100 opacity-100"
@@ -168,7 +181,7 @@ function LanguageMenu({ language, onChange, t, align = "right" }) {
 function useIsDesktop() {
   const query = "(min-width: 1024px)";
   const [matches, setMatches] = useState(() =>
-    typeof window !== "undefined" ? window.matchMedia(query).matches : true
+    typeof window !== "undefined" ? window.matchMedia(query).matches : true,
   );
 
   useEffect(() => {
@@ -224,7 +237,10 @@ export default function Navbar() {
   const prevPathname = useRef(location.pathname);
   const prevIsDesktop = useRef(isDesktop);
   useEffect(() => {
-    if (prevPathname.current !== location.pathname || prevIsDesktop.current !== isDesktop) {
+    if (
+      prevPathname.current !== location.pathname ||
+      prevIsDesktop.current !== isDesktop
+    ) {
       prevPathname.current = location.pathname;
       prevIsDesktop.current = isDesktop;
       const timeout = setTimeout(() => setMobileOpen(false), 0);
@@ -235,7 +251,8 @@ export default function Navbar() {
   useEffect(() => {
     if (!mobileOpen) return;
     const onDown = (e) => {
-      if (navRef.current && !navRef.current.contains(e.target)) setMobileOpen(false);
+      if (navRef.current && !navRef.current.contains(e.target))
+        setMobileOpen(false);
     };
     const onKey = (e) => e.key === "Escape" && setMobileOpen(false);
     document.addEventListener("mousedown", onDown);
@@ -248,7 +265,10 @@ export default function Navbar() {
     };
   }, [mobileOpen]);
 
-  const firstName = String(user?.name || "").trim().split(/\s+/)[0] || "Account";
+  const firstName =
+    String(user?.name || "")
+      .trim()
+      .split(/\s+/)[0] || "Account";
 
   return (
     <nav
@@ -320,7 +340,9 @@ export default function Navbar() {
         {/* Wide Search (Desktop only) */}
         <div className="flex min-w-0 justify-center">
           {isDesktop && (
-            <div className={`w-full max-w-[clamp(20rem,38vw,42rem)] ${SEARCH_NO_BG}`}>
+            <div
+              className={`w-full max-w-[clamp(20rem,38vw,42rem)] ${SEARCH_NO_BG}`}
+            >
               <NavSearch variant="desktop" />
             </div>
           )}
@@ -328,7 +350,9 @@ export default function Navbar() {
 
         {/* Right side controls */}
         <div className="col-start-3 flex min-w-0 items-center justify-end gap-2 sm:gap-3">
-          {isDesktop && <LanguageMenu language={language} onChange={changeLanguage} t={t} />}
+          {isDesktop && (
+            <LanguageMenu language={language} onChange={changeLanguage} t={t} />
+          )}
 
           {/* Profile / Sign In */}
           {user ? (
@@ -382,7 +406,12 @@ export default function Navbar() {
 
             {/* Bottom Row: Language Menu replacing Home button + User Links / Sign In */}
             <div className="flex items-center justify-between border-t border-white/10 px-1 pt-2 text-xs text-slate-300">
-              <LanguageMenu language={language} onChange={changeLanguage} t={t} align="left" />
+              <LanguageMenu
+                language={language}
+                onChange={changeLanguage}
+                t={t}
+                align="left"
+              />
 
               {user ? (
                 <div className="flex items-center gap-2 sm:gap-3">
@@ -402,22 +431,14 @@ export default function Navbar() {
                   >
                     Liked
                   </Link>
-                  <Link
-                    to="/profile"
-                    replace={location.pathname !== "/"}
-                    onClick={() => setMobileOpen(false)}
-                    className="rounded-md px-2 py-1 transition hover:text-[#8B5CF6]"
-                  >
-                    Profile
-                  </Link>
                 </div>
               ) : (
                 <Link
-                  to="/login"
+                  to="/register"
                   onClick={() => setMobileOpen(false)}
                   className="rounded-md px-3 py-1 font-semibold text-[#8B5CF6] transition hover:text-[#22D3EE]"
                 >
-                  Sign In
+                  Sign Up
                 </Link>
               )}
             </div>

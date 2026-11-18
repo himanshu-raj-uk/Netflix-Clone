@@ -100,7 +100,9 @@ function AppRoutes() {
             path="/register"
             element={
               <PublicRoute>
-                <Register />
+                <SafeNavigationRoute>
+                  <Register />
+                </SafeNavigationRoute>
               </PublicRoute>
             }
           />
@@ -109,7 +111,9 @@ function AppRoutes() {
             path="/login"
             element={
               <PublicRoute>
-                <Login />
+                <SafeNavigationRoute>
+                  <Login />
+                </SafeNavigationRoute>
               </PublicRoute>
             }
           />
@@ -142,7 +146,9 @@ function AppRoutes() {
             path="/resend-otp"
             element={
               <PublicRoute>
-                <ResendOtp />
+                <SafeNavigationRoute>
+                  <ResendOtp />
+                </SafeNavigationRoute>
               </PublicRoute>
             }
           />
@@ -151,7 +157,9 @@ function AppRoutes() {
             path="/forgot-password"
             element={
               <PublicRoute>
-                <ForgotPassword />
+                <SafeNavigationRoute>
+                  <ForgotPassword />
+                </SafeNavigationRoute>
               </PublicRoute>
             }
           />
@@ -160,7 +168,9 @@ function AppRoutes() {
             path="/reset-password"
             element={
               <PublicRoute>
-                <ResetPassword />
+                <SafeNavigationRoute>
+                  <ResetPassword />
+                </SafeNavigationRoute>
               </PublicRoute>
             }
           />

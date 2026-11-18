@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { ArrowLeft, CircleAlert, Eye, EyeOff } from "lucide-react";
 
@@ -38,6 +38,17 @@ export const maskEmail = (email = "") => {
   return `${name.slice(0, 2)}${"*".repeat(Math.max(name.length - 2, 1))}@${domain}`;
 };
 
+/* ---------------- curated cinematic backdrops ---------------- */
+
+const CINEMATIC_POSTERS = [
+  "https://image.tmdb.org/t/p/original/56v2KjBlU4XaOv9rVYEQypROD7P.jpg", // Stranger Things
+  "https://image.tmdb.org/t/p/original/xOMo8BRK7PfcJv9JCnx7s520b42.jpg", // Dune: Part Two
+  "https://image.tmdb.org/t/p/original/8YFL5QQVPy3AgrEQxNYVSgiPEbe.jpg", // Oppenheimer
+  "https://image.tmdb.org/t/p/original/gg4IBva7UC9nj0jt7NmFY9UbP10.jpg", // Spider-Man: Across the Spider-Verse
+  "https://image.tmdb.org/t/p/original/vL5W4BpP9Vh1sL7HGugip2359Kc.jpg", // Avatar: The Way of Water
+  "https://image.tmdb.org/t/p/original/nMKdUUepR0i5zn0y1T4CsSB5chy.jpg", // The Dark Knight
+];
+
 /* ---------------- styles ---------------- */
 
 const AUTH_CSS = `
@@ -47,20 +58,20 @@ const AUTH_CSS = `
 .auth-input:-webkit-autofill:focus {
   -webkit-text-fill-color: #fff;
   caret-color: #fff;
-  box-shadow: 0 0 0 1000px #111827 inset;
+  box-shadow: 0 0 0 1000px #0e1422 inset;
   transition: background-color 600000s 0s, color 600000s 0s;
 }
 `;
 
 const fieldClass = (hasError, compact) =>
-  `auth-input ${compact ? "h-10" : "h-12"} w-full rounded-xl border bg-[#111827]/70 py-2 pl-11 pr-4 text-sm text-white outline-none transition-all duration-300 placeholder:text-slate-500 hover:border-[#8B5CF6]/50 focus:border-[#8B5CF6] focus:ring-2 focus:ring-[#8B5CF6]/25 disabled:cursor-not-allowed disabled:opacity-60 ${
+  `auth-input ${compact ? "h-9 sm:h-10 text-xs sm:text-sm" : "h-10 sm:h-11 text-xs sm:text-sm"} w-full rounded-xl border bg-[#0b0f19]/80 py-2 pl-9 sm:pl-10 pr-4 text-white outline-none transition-all duration-200 placeholder:text-slate-500 hover:border-[#8B5CF6]/50 focus:border-[#8B5CF6] focus:ring-2 focus:ring-[#8B5CF6]/25 disabled:cursor-not-allowed disabled:opacity-60 ${
     hasError
       ? "border-red-500/80 focus:border-red-500 focus:ring-red-500/20"
       : "border-white/10"
   }`;
 
 export const primaryBtn =
-  "flex h-11 w-full items-center justify-center gap-2 rounded-lg bg-[#8B5CF6] px-4 text-sm font-semibold text-white transition-colors duration-200 hover:bg-[#7C3AED] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8B5CF6] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60";
+  "flex h-10 sm:h-11 w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#8B5CF6] to-[#7C3AED] px-4 text-xs sm:text-sm font-semibold text-white shadow-md shadow-[#8B5CF6]/20 transition-all duration-200 hover:from-[#7C3AED] hover:to-[#6D28D9] hover:shadow-lg hover:shadow-[#8B5CF6]/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8B5CF6] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60";
 
 export const linkBtn =
   "font-semibold text-[#22D3EE] transition-colors hover:text-[#8B5CF6] hover:underline underline-offset-4";
@@ -68,53 +79,73 @@ export const linkBtn =
 /* ---------------- layout ---------------- */
 
 export function AuthLayout({ children, wide = false }) {
+  const [posterIndex, setPosterIndex] = useState(0);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setPosterIndex((prev) => (prev + 1) % CINEMATIC_POSTERS.length);
+    }, 6500);
+    return () => clearInterval(timer);
+  }, []);
+
   return (
-    <main className="relative flex min-h-screen items-center justify-center overflow-hidden bg-[#080B14] px-4 py-8 text-white sm:px-6">
+    <main className="relative flex min-h-screen w-full items-center justify-center overflow-x-hidden overflow-y-auto bg-[#070913] px-3.5 py-12 sm:px-6">
       <style>{AUTH_CSS}</style>
 
-      {/* Cinematic Backdrop Image with soft opacity */}
-      <div
-        aria-hidden="true"
-        className="absolute inset-0 bg-cover bg-center opacity-40 blur-sm scale-105 transition-transform duration-1000"
-        style={{
-          backgroundImage:
-            "url('https://image.tmdb.org/t/p/original/56v2KjBlU4XaOv9rVYEQypROD7P.jpg')",
-        }}
-      />
+      {/* Crossfading Movie Poster Slideshow with Smooth Zoom */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none">
+        {CINEMATIC_POSTERS.map((poster, index) => {
+          const isActive = index === posterIndex;
+          return (
+            <div
+              key={poster}
+              aria-hidden="true"
+              className={`absolute inset-0 bg-cover bg-center transition-all duration-1000 ease-in-out ${
+                isActive
+                  ? "opacity-35 scale-100 filter blur-[1px]"
+                  : "opacity-0 scale-105 pointer-events-none"
+              }`}
+              style={{
+                backgroundImage: `url('${poster}')`,
+              }}
+            />
+          );
+        })}
 
-      {/* Layered cinematic overlays (Midnight gradient + Violet/Cyan spotlights) */}
-      <div
-        aria-hidden="true"
-        className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(139,92,246,0.2)_0%,transparent_60%)]"
-      />
-      <div
-        aria-hidden="true"
-        className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_right,rgba(34,211,238,0.15)_0%,transparent_50%)]"
-      />
-      <div
-        aria-hidden="true"
-        className="absolute inset-0 bg-[linear-gradient(to_right,rgba(8,11,20,0.92),rgba(8,11,20,0.7),rgba(8,11,20,0.92)),linear-gradient(to_top,#080B14_0%,transparent_60%,rgba(8,11,20,0.8)_100%)]"
-      />
+        {/* Ambient Dark Overlays & Glows */}
+        <div
+          aria-hidden="true"
+          className="absolute inset-0 bg-gradient-to-t from-[#070913] via-[#070913]/65 to-[#070913]/90"
+        />
+        <div
+          aria-hidden="true"
+          className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(139,92,246,0.18)_0%,transparent_60%)]"
+        />
+        <div
+          aria-hidden="true"
+          className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_right,rgba(34,211,238,0.12)_0%,transparent_50%)]"
+        />
+      </div>
 
-      {/* Brand logo top left */}
+      {/* Brand logo at top left */}
       <Link
         to="/"
         aria-label="Netflix home"
-        className="absolute left-5 top-5 z-20 transition-all duration-300 hover:scale-105 sm:left-8 sm:top-7"
+        className="absolute left-4 top-4 z-20 transition-all duration-300 hover:scale-105 sm:left-7 sm:top-6"
       >
         <img
           src="https://upload.wikimedia.org/wikipedia/commons/0/08/Netflix_2015_logo.svg"
           alt="Netflix"
-          className="w-24 sm:w-32 drop-shadow-[0_2px_12px_rgba(0,0,0,0.9)]"
+          className="w-20 sm:w-28 drop-shadow-[0_2px_10px_rgba(0,0,0,0.9)]"
         />
       </Link>
 
-      {/* Main Glassmorphic Auth Card */}
+      {/* Medium-sized, ultra-responsive Glassmorphic Auth Card */}
       <section
-        className={`relative z-10 w-full rounded-2xl border border-white/10 bg-[#111827]/85 shadow-[0_20px_60px_rgba(0,0,0,0.85),0_0_35px_rgba(139,92,246,0.15)] backdrop-blur-2xl ${
+        className={`relative z-10 my-auto w-full rounded-2xl border border-white/10 bg-[#0e1424]/85 shadow-[0_20px_50px_rgba(0,0,0,0.85),0_0_25px_rgba(139,92,246,0.12)] backdrop-blur-xl transition-all duration-300 ${
           wide
-            ? "mt-12 max-w-[540px] px-6 py-6 sm:mt-10 sm:px-8 sm:py-7"
-            : "mt-14 max-w-[420px] px-6 py-8 sm:mt-12 sm:px-8 sm:py-9"
+            ? "max-w-[94vw] sm:max-w-[460px] md:max-w-[480px] p-4 sm:p-6"
+            : "max-w-[92vw] sm:max-w-[380px] md:max-w-[390px] p-5 sm:p-6"
         }`}
       >
         {children}
@@ -128,9 +159,9 @@ export function BackLink({ to, replace = false, children = "Back to sign in" }) 
     <Link
       to={to}
       replace={replace}
-      className="mb-5 inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-slate-400 transition-colors hover:text-[#22D3EE]"
+      className="mb-3.5 inline-flex items-center gap-1.5 text-[11px] sm:text-xs font-semibold uppercase tracking-wider text-slate-400 transition-colors hover:text-[#22D3EE]"
     >
-      <ArrowLeft size={15} />
+      <ArrowLeft size={14} />
       {children}
     </Link>
   );
@@ -138,19 +169,29 @@ export function BackLink({ to, replace = false, children = "Back to sign in" }) 
 
 export function Heading({ eyebrow, title, text, compact = false }) {
   return (
-    <div className={compact ? "mb-4" : "mb-6"}>
-      <p
-        className={`text-[11px] font-bold uppercase tracking-[0.25em] text-[#22D3EE] ${
-          compact ? "mb-1" : "mb-2"
+    <div className={compact ? "mb-3" : "mb-4 sm:mb-5"}>
+      {eyebrow && (
+        <p
+          className={`text-[10px] sm:text-[11px] font-bold uppercase tracking-[0.2em] text-[#22D3EE] ${
+            compact ? "mb-0.5" : "mb-1"
+          }`}
+        >
+          {eyebrow}
+        </p>
+      )}
+      <h1
+        className={`font-black tracking-tight text-white ${
+          compact ? "text-xl sm:text-2xl" : "text-xl sm:text-2xl md:text-[26px]"
         }`}
       >
-        {eyebrow}
-      </p>
-      <h1 className={`font-black tracking-tight text-white ${compact ? "text-2xl" : "text-2xl sm:text-3xl"}`}>
         {title}
       </h1>
       {text && (
-        <p className={`break-words text-sm text-slate-400 ${compact ? "mt-1 leading-5" : "mt-2 leading-6"}`}>
+        <p
+          className={`break-words text-xs sm:text-sm text-slate-400 ${
+            compact ? "mt-0.5 leading-4 sm:leading-5" : "mt-1 leading-5"
+          }`}
+        >
           {text}
         </p>
       )}
@@ -163,9 +204,9 @@ export function FormError({ message }) {
   return (
     <p
       role="alert"
-      className="mt-3 flex items-center gap-2 rounded-xl border border-red-500/30 bg-red-500/10 px-3.5 py-2.5 text-xs font-medium leading-5 text-red-300"
+      className="mt-2.5 flex items-center gap-2 rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-2 text-xs font-medium leading-snug text-red-300"
     >
-      <CircleAlert size={16} className="shrink-0 text-red-400" />
+      <CircleAlert size={15} className="shrink-0 text-red-400" />
       <span>{message}</span>
     </p>
   );
@@ -174,7 +215,7 @@ export function FormError({ message }) {
 export function InfoBox({ message }) {
   if (!message) return null;
   return (
-    <p className="mb-4 rounded-xl border border-[#22D3EE]/30 bg-[#22D3EE]/10 px-3.5 py-2.5 text-xs font-medium text-[#22D3EE]">
+    <p className="mb-3 rounded-lg border border-[#22D3EE]/30 bg-[#22D3EE]/10 px-3 py-2 text-xs font-medium text-[#22D3EE]">
       {message}
     </p>
   );
@@ -196,31 +237,39 @@ export function Field({
     <div className="group">
       <label
         htmlFor={id}
-        className={`block text-xs font-semibold tracking-wide text-slate-300 transition-colors group-focus-within:text-[#22D3EE] ${
-          compact ? "mb-1" : "mb-1.5"
+        className={`block text-[11px] sm:text-xs font-semibold tracking-wide text-slate-300 transition-colors group-focus-within:text-[#22D3EE] ${
+          compact ? "mb-0.5" : "mb-1"
         }`}
       >
         {label}
       </label>
       <div className="relative">
-        <Icon
-          size={18}
-          className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 transition-colors group-focus-within:text-[#8B5CF6]"
-        />
+        {Icon && (
+          <Icon
+            size={16}
+            className="pointer-events-none absolute left-3 sm:left-3.5 top-1/2 -translate-y-1/2 text-slate-400 transition-colors group-focus-within:text-[#8B5CF6]"
+          />
+        )}
         <input
           id={id}
           name={id}
           aria-invalid={Boolean(error)}
           aria-describedby={error ? `${id}-error` : undefined}
-          className={`${fieldClass(Boolean(error), compact)} ${right ? "pr-12" : ""} ${className}`}
+          className={`${fieldClass(Boolean(error), compact)} ${
+            Icon ? "" : "pl-3.5"
+          } ${right ? "pr-10 sm:pr-11" : ""} ${className}`}
           {...inputProps}
         />
         {right}
       </div>
-      <div className={compact ? "min-h-[18px] pt-1" : "min-h-[20px] pt-1.5"}>
+      <div className={compact ? "min-h-[16px] pt-0.5" : "min-h-[18px] pt-1"}>
         {error && (
-          <p id={`${id}-error`} role="alert" className="flex items-start gap-1.5 text-xs leading-5 text-red-400">
-            <CircleAlert size={14} className="mt-[3px] shrink-0" />
+          <p
+            id={`${id}-error`}
+            role="alert"
+            className="flex items-start gap-1 text-[11px] leading-4 text-red-400"
+          >
+            <CircleAlert size={12} className="mt-[2px] shrink-0" />
             <span className="break-words">{error}</span>
           </p>
         )}
@@ -235,9 +284,9 @@ export function PasswordToggle({ show, onToggle }) {
       type="button"
       onClick={onToggle}
       aria-label={show ? "Hide password" : "Show password"}
-      className="absolute right-2 top-1/2 -translate-y-1/2 rounded-lg p-2 text-slate-400 transition-colors hover:text-[#22D3EE] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8B5CF6]"
+      className="absolute right-1.5 top-1/2 -translate-y-1/2 rounded-lg p-1.5 text-slate-400 transition-colors hover:text-[#22D3EE] focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#8B5CF6]"
     >
-      {show ? <EyeOff size={18} /> : <Eye size={18} />}
+      {show ? <EyeOff size={16} /> : <Eye size={16} />}
     </button>
   );
 }
@@ -288,7 +337,11 @@ export function OtpInput({ value, onChange, disabled, error }) {
 
   return (
     <div>
-      <div role="group" aria-label="6-digit verification code" className="flex justify-between gap-2">
+      <div
+        role="group"
+        aria-label="6-digit verification code"
+        className="flex justify-between gap-1.5 sm:gap-2"
+      >
         {Array.from({ length: 6 }, (_, i) => (
           <input
             key={i}
@@ -310,21 +363,24 @@ export function OtpInput({ value, onChange, disabled, error }) {
               }
             }}
             onFocus={(e) => e.target.select()}
-            className={`auth-input relative h-11 w-0 min-w-0 max-w-[3rem] flex-1 rounded-lg border bg-[#111827] p-0 text-center text-lg font-bold text-white caret-[#22D3EE] outline-none transition-colors duration-150 disabled:cursor-not-allowed disabled:opacity-60 ${
+            className={`auth-input relative h-10 w-9 sm:h-11 sm:w-11 max-w-[2.75rem] flex-1 rounded-xl border bg-[#0b0f19] p-0 text-center text-base sm:text-lg font-bold text-white caret-[#22D3EE] outline-none transition-all duration-150 disabled:cursor-not-allowed disabled:opacity-60 ${
               error
                 ? "border-red-500"
                 : value[i]
-                ? "border-[#8B5CF6] text-[#22D3EE]"
-                : "border-white/15 focus:border-[#8B5CF6]"
+                ? "border-[#8B5CF6] text-[#22D3EE] ring-1 ring-[#8B5CF6]/30"
+                : "border-white/15 focus:border-[#8B5CF6] focus:ring-1 focus:ring-[#8B5CF6]/30"
             }`}
           />
         ))}
       </div>
 
-      <div className="min-h-[20px] pt-2">
+      <div className="min-h-[18px] pt-1.5">
         {error && (
-          <p role="alert" className="flex items-start gap-1.5 text-xs leading-5 text-red-400">
-            <CircleAlert size={14} className="mt-[3px] shrink-0" />
+          <p
+            role="alert"
+            className="flex items-start gap-1 text-[11px] leading-4 text-red-400"
+          >
+            <CircleAlert size={13} className="mt-[2px] shrink-0" />
             <span className="break-words">{error}</span>
           </p>
         )}

@@ -6,6 +6,15 @@ const transporter = nodemailer.createTransport({
     user: process.env.GOOGLE_USER_NAME,
     pass: process.env.GOOGLE_USER_PASSWORD,
   },
+  connectionTimeout: 10000,
+  greetingTimeout: 10000, 
+  socketTimeout: 15000, 
+});
+
+transporter.verify((err) => {
+  if (err) {
+    console.error("NODEMAILER CONFIG ERROR:", err.message);
+  }
 });
 
 const sendEmail = async ({ to, subject, html }) => {

@@ -112,10 +112,14 @@ export default function VerifyOTP() {
       >
         <OtpInput value={otp} onChange={handleChange} disabled={loading} error={error} />
 
-        <button type="submit" disabled={loading || otp.length !== 6} className={`${primaryBtn} mt-3`}>
+        <button
+          type="submit"
+          disabled={loading || otp.length !== 6}
+          className={`${primaryBtn} mt-3`}
+        >
           {loading ? (
             <>
-              <LoaderCircle size={19} className="animate-spin text-[#22D3EE]" />
+              <LoaderCircle size={18} className="animate-spin text-[#22D3EE]" />
               Verifying...
             </>
           ) : isReset ? (
@@ -126,7 +130,7 @@ export default function VerifyOTP() {
         </button>
       </form>
 
-      <div className="mt-6 flex flex-wrap items-center justify-between gap-3 text-xs sm:text-sm">
+      <div className="mt-5 flex flex-wrap items-center justify-between gap-2.5 text-xs sm:text-sm">
         <button
           type="button"
           onClick={handleResend}
