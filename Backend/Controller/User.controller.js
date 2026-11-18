@@ -151,128 +151,128 @@ const register = async (req, res, next) => {
 
 // USER REGISTER BY GOOGLE
 
-const googleLogin = async (req, res, next) => {
-  try {
-    const { credential } = req.body;
+// const googleLogin = async (req, res, next) => {
+//   try {
+//     const { credential } = req.body;
 
-    if (!credential) {
-      throw new ApiError(400, "Google authentication credential is required");
-    }
+//     if (!credential) {
+//       throw new ApiError(400, "Google authentication credential is required");
+//     }
 
-    if (!process.env.GOOGLE_CLIENT_ID) {
-      console.error("GOOGLE_CLIENT_ID is missing from server environment");
+//     if (!process.env.GOOGLE_CLIENT_ID) {
+//       console.error("GOOGLE_CLIENT_ID is missing from server environment");
 
-      throw new ApiError(500, "Google authentication is not configured");
-    }
+//       throw new ApiError(500, "Google authentication is not configured");
+//     }
 
-    const ticket = await googleClient.verifyIdToken({
-      idToken: credential,
-      audience: process.env.GOOGLE_CLIENT_ID,
-    });
+//     const ticket = await googleClient.verifyIdToken({
+//       idToken: credential,
+//       audience: process.env.GOOGLE_CLIENT_ID,
+//     });
 
-    const payload = ticket.getPayload();
+//     const payload = ticket.getPayload();
 
-    if (!payload) {
-      throw new ApiError(401, "Invalid Google authentication");
-    }
+//     if (!payload) {
+//       throw new ApiError(401, "Invalid Google authentication");
+//     }
 
-    const {
-      sub: googleId,
-      email,
-      email_verified: emailVerified,
-      name,
-      picture,
-    } = payload;
+//     const {
+//       sub: googleId,
+//       email,
+//       email_verified: emailVerified,
+//       name,
+//       picture,
+//     } = payload;
 
-    if (!googleId || !email) {
-      throw new ApiError(401, "Google account information is incomplete");
-    }
+//     if (!googleId || !email) {
+//       throw new ApiError(401, "Google account information is incomplete");
+//     }
 
-    if (!emailVerified) {
-      throw new ApiError(401, "Google email is not verified");
-    }
+//     if (!emailVerified) {
+//       throw new ApiError(401, "Google email is not verified");
+//     }
 
-    const normalizedEmail = email.toLowerCase();
+//     const normalizedEmail = email.toLowerCase();
 
-    let user = await User.findOne({
-      email: normalizedEmail,
-    });
+//     let user = await User.findOne({
+//       email: normalizedEmail,
+//     });
 
-    if (user?.isBlocked) {
-      throw new ApiError(403, "Your account has been blocked");
-    }
+//     if (user?.isBlocked) {
+//       throw new ApiError(403, "Your account has been blocked");
+//     }
 
-    if (!user) {
-      user = await User.create({
-        name: name || "Google User",
-        email: normalizedEmail,
-        googleId,
-        authProvider: "google",
-        isVerified: true,
-        profileImage: {
-          url: picture || "",
-          public_id: "",
-        },
-      });
-    } else {
-      if (user.googleId && user.googleId !== googleId) {
-        throw new ApiError(401, "Google account does not match this email");
-      }
+//     if (!user) {
+//       user = await User.create({
+//         name: name || "Google User",
+//         email: normalizedEmail,
+//         googleId,
+//         authProvider: "google",
+//         isVerified: true,
+//         profileImage: {
+//           url: picture || "",
+//           public_id: "",
+//         },
+//       });
+//     } else {
+//       if (user.googleId && user.googleId !== googleId) {
+//         throw new ApiError(401, "Google account does not match this email");
+//       }
 
-      user.googleId = googleId;
-      user.isVerified = true;
+//       user.googleId = googleId;
+//       user.isVerified = true;
 
-      if (!user.authProvider) {
-        user.authProvider = "google";
-      }
+//       if (!user.authProvider) {
+//         user.authProvider = "google";
+//       }
 
-      if (!user.name && name) {
-        user.name = name;
-      }
+//       if (!user.name && name) {
+//         user.name = name;
+//       }
 
-      if (picture && (!user.profileImage || !user.profileImage.url)) {
-        user.profileImage = {
-          url: picture,
-          public_id: "",
-        };
-      }
+//       if (picture && (!user.profileImage || !user.profileImage.url)) {
+//         user.profileImage = {
+//           url: picture,
+//           public_id: "",
+//         };
+//       }
 
-      await user.save();
-    }
+//       await user.save();
+//     }
 
-    const accessToken = AccessToken(user);
-    const refreshToken = RefreshToken(user);
+//     const accessToken = AccessToken(user);
+//     const refreshToken = RefreshToken(user);
 
-    user.refreshToken = refreshToken;
+//     user.refreshToken = refreshToken;
 
-    await user.save();
+//     await user.save();
 
-    const profileCompleted = Boolean(user.phone) && Boolean(user.password);
+//     const profileCompleted = Boolean(user.phone) && Boolean(user.password);
 
-    return res.status(200).json({
-      status: true,
-      message: "Google sign-in successful",
-      data: {
-        user: {
-          id: user._id,
-          name: user.name,
-          email: user.email,
-          phone: user.phone || "",
-          role: user.role,
-          isVerified: user.isVerified,
-          authProvider: user.authProvider,
-          profileCompleted,
-        },
-        accessToken,
-        refreshToken,
-      },
-    });
-  } catch (err) {
-    console.error("GOOGLE LOGIN ERROR:", err.message);
+//     return res.status(200).json({
+//       status: true,
+//       message: "Google sign-in successful",
+//       data: {
+//         user: {
+//           id: user._id,
+//           name: user.name,
+//           email: user.email,
+//           phone: user.phone || "",
+//           role: user.role,
+//           isVerified: user.isVerified,
+//           authProvider: user.authProvider,
+//           profileCompleted,
+//         },
+//         accessToken,
+//         refreshToken,
+//       },
+//     });
+//   } catch (err) {
+//     console.error("GOOGLE LOGIN ERROR:", err.message);
 
-    next(err);
-  }
-};
+//     next(err);
+//   }
+// };
 
 // USER LOGIN
 
