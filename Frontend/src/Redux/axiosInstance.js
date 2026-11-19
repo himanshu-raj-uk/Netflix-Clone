@@ -7,7 +7,7 @@ const baseURL = String(rawBaseURL).trim().replace(/\/+$/, "");
 const axiosInstance = axios.create({
   baseURL,
   withCredentials: true,
-  timeout: 60000, // 60s — Render free-tier cold starts can take 30-60s
+  timeout: 90000, // 90s — Render free-tier cold starts can take 30-60s
 });
 
 axiosInstance.interceptors.request.use(

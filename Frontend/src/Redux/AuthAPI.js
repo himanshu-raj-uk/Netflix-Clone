@@ -77,7 +77,7 @@ export const logoutUser = () => {
 
 export const getMovieLists = async () => {
   const response = await axiosInstance.get("/user/movie-lists");
-  return response.data;
+  return response; // return full axios response so Profile.jsx can normalise
 };
 
 export const addMovieToList = async (listType, movieId, movie) => {

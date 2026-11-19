@@ -676,11 +676,12 @@ function UpdateProfilePanel({ onSaved, onClose }) {
   return (
     <form
       onSubmit={handleSubmit}
-      className="grid grid-cols-1 gap-5 rounded-xl border border-white/10 p-3.5 sm:p-5 lg:grid-cols-[180px_1fr] lg:gap-5"
+      className="grid grid-cols-1 gap-4 rounded-xl border border-white/10 p-3 sm:p-4 lg:grid-cols-[160px_1fr] lg:gap-5 lg:p-5"
     >
-      <div className="flex items-center gap-4 lg:flex-col lg:items-center lg:text-center">
+      {/* Avatar + photo controls */}
+      <div className="flex items-center gap-3 lg:flex-col lg:items-center lg:text-center">
         <div className="relative shrink-0">
-          <span className="flex h-20 w-20 items-center justify-center overflow-hidden rounded-2xl bg-gradient-to-tr from-[#8B5CF6] to-[#22D3EE] text-2xl font-bold text-white sm:h-24 sm:w-24">
+          <span className="flex h-16 w-16 items-center justify-center overflow-hidden rounded-xl bg-gradient-to-tr from-[#8B5CF6] to-[#22D3EE] text-xl font-bold text-white sm:h-20 sm:w-20 lg:h-24 lg:w-24 lg:rounded-2xl">
             {imageUrl ? (
               <img
                 src={imageUrl}
@@ -696,9 +697,9 @@ function UpdateProfilePanel({ onSaved, onClose }) {
             type="button"
             onClick={() => fileRef.current?.click()}
             aria-label="Change photo"
-            className="absolute inset-0 flex items-center justify-center rounded-2xl bg-[#080B14]/60"
+            className="absolute inset-0 flex items-center justify-center rounded-xl bg-[#080B14]/60 lg:rounded-2xl"
           >
-            <Camera size={22} className="text-[#22D3EE]" />
+            <Camera size={18} className="text-[#22D3EE] lg:text-[22px]" />
           </button>
 
           <input
@@ -710,7 +711,7 @@ function UpdateProfilePanel({ onSaved, onClose }) {
           />
         </div>
 
-        <div className="flex flex-col gap-2">
+        <div className="flex flex-col gap-1.5">
           <button
             type="button"
             onClick={() => fileRef.current?.click()}
@@ -725,21 +726,22 @@ function UpdateProfilePanel({ onSaved, onClose }) {
               onClick={clearImage}
               className="flex items-center gap-1.5 text-xs text-slate-400 hover:text-red-400"
             >
-              <Trash2 size={13} />
+              <Trash2 size={12} />
               Remove photo
             </button>
           )}
 
-          <p className="text-[11px] text-slate-500">JPG or PNG, up to 2MB</p>
+          <p className="text-[10px] text-slate-500 lg:text-[11px]">JPG or PNG, up to 2MB</p>
         </div>
       </div>
 
+      {/* Fields */}
       <div className="min-w-0">
-        <h3 className="mb-3 text-sm font-bold uppercase tracking-wider text-[#8B5CF6]">
+        <h3 className="mb-2.5 text-xs font-bold uppercase tracking-wider text-[#8B5CF6] lg:mb-3 lg:text-sm">
           Personal details
         </h3>
 
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
+        <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:gap-3 xl:grid-cols-3">
           <Field
             label="Full name"
             name="name"
@@ -769,11 +771,11 @@ function UpdateProfilePanel({ onSaved, onClose }) {
           />
         </div>
 
-        <h3 className="mb-3 mt-6 text-sm font-bold uppercase tracking-wider text-[#22D3EE]">
+        <h3 className="mb-2.5 mt-4 text-xs font-bold uppercase tracking-wider text-[#22D3EE] lg:mb-3 lg:mt-6 lg:text-sm">
           Address details
         </h3>
 
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
+        <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:gap-3 xl:grid-cols-3">
           <Field
             label="Recipient name"
             name="fullName"
@@ -827,27 +829,27 @@ function UpdateProfilePanel({ onSaved, onClose }) {
         </div>
 
         {error && (
-          <p role="alert" className="mt-3 text-xs text-red-400">
+          <p role="alert" className="mt-2.5 text-xs text-red-400">
             {error}
           </p>
         )}
 
         {success && (
-          <p role="status" className="mt-3 text-xs text-[#22D3EE]">
+          <p role="status" className="mt-2.5 text-xs text-[#22D3EE]">
             {success}
           </p>
         )}
 
-        <div className="mt-5 flex flex-wrap gap-2.5">
+        <div className="mt-4 flex flex-wrap gap-2">
           <button
             type="submit"
             disabled={saving}
-            className="flex h-10 items-center gap-2 rounded-md bg-[#8B5CF6] px-5 text-xs font-semibold text-white hover:bg-[#7C3AED] disabled:opacity-60"
+            className="flex h-9 items-center gap-2 rounded-md bg-[#8B5CF6] px-4 text-xs font-semibold text-white hover:bg-[#7C3AED] disabled:opacity-60 lg:h-10 lg:px-5"
           >
             {saving ? (
-              <LoaderCircle size={14} className="animate-spin" />
+              <LoaderCircle size={13} className="animate-spin" />
             ) : (
-              <Check size={15} />
+              <Check size={14} />
             )}
 
             {saving ? "Saving..." : "Save Changes"}
@@ -857,9 +859,9 @@ function UpdateProfilePanel({ onSaved, onClose }) {
             type="button"
             onClick={onClose}
             disabled={saving}
-            className="flex h-10 items-center gap-1.5 rounded-md border border-white/20 px-4 text-xs font-semibold text-slate-300 hover:text-white"
+            className="flex h-9 items-center gap-1.5 rounded-md border border-white/20 px-3 text-xs font-semibold text-slate-300 hover:text-white lg:h-10 lg:px-4"
           >
-            <X size={14} />
+            <X size={13} />
             Cancel
           </button>
         </div>
@@ -884,6 +886,7 @@ export default function Profile() {
   });
 
   const [listsLoading, setListsLoading] = useState(true);
+  const [listsSlow, setListsSlow] = useState(false);
   const [removingId, setRemovingId] = useState("");
   const [listError, setListError] = useState("");
 
@@ -898,7 +901,10 @@ export default function Profile() {
 
     setPanelMounted(true);
     setUpdateOpen(true);
-    scrollToRef(panelRef, 150);
+    // Only scroll to the panel on mobile — on desktop it is already in view
+    if (window.innerWidth < 1024) {
+      scrollToRef(panelRef, 150);
+    }
   };
 
   const closeUpdate = () => {
@@ -913,12 +919,18 @@ export default function Profile() {
     }
 
     setListsLoading(true);
+    setListsSlow(false);
     setListError("");
+
+    // Show "server waking up" hint after 8 s (Render free-tier cold start)
+    const slowTimer = setTimeout(() => setListsSlow(true), 8000);
 
     try {
       const response = await getMovieLists();
 
-      const data = response?.data?.data ?? response?.data ?? response;
+      // getMovieLists now returns the full axios response
+      const data =
+        response?.data?.data ?? response?.data ?? response;
 
       if (!data || typeof data !== "object") {
         throw new Error("Invalid movie-list response.");
@@ -935,9 +947,11 @@ export default function Profile() {
       });
     } catch (err) {
       setListError(
-        err?.response?.data?.message ||
-          err?.message ||
-          "Unable to load your saved movies.",
+        err?.code === "ECONNABORTED"
+          ? "Server is taking too long to respond. It may be waking up — please retry in a moment."
+          : err?.response?.data?.message ||
+              err?.message ||
+              "Unable to load your saved movies.",
       );
 
       if (err?.response?.status === 401) {
@@ -945,7 +959,9 @@ export default function Profile() {
         navigate("/login", { replace: true });
       }
     } finally {
+      clearTimeout(slowTimer);
       setListsLoading(false);
+      setListsSlow(false);
     }
   }, [navigate]);
 
@@ -1059,9 +1075,17 @@ export default function Profile() {
                     </p>
                   </div>
 
-                  <p className="text-xs text-slate-500">
-                    Please wait while we fetch your movies
-                  </p>
+                  {listsSlow && (
+                    <p className="text-center text-xs text-amber-400/80">
+                      Server is waking up — this may take a moment…
+                    </p>
+                  )}
+
+                  {!listsSlow && (
+                    <p className="text-xs text-slate-500">
+                      Please wait while we fetch your movies
+                    </p>
+                  )}
                 </section>
               ))}
             </div>
@@ -1097,14 +1121,19 @@ export default function Profile() {
               <LockKeyhole className="h-5 w-5 text-[#8B5CF6]" />
 
               <h2 className="text-sm font-bold uppercase tracking-wider text-[#8B5CF6] sm:text-base">
-                Account & Security
+                Account &amp; Security
               </h2>
 
               <span className="h-px flex-1 bg-white/10" />
             </div>
 
-            <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2 lg:grid-cols-3">
-              <div className="min-w-0">
+            {/* Action tiles + panel grid
+                Mobile:  [Update Profile] → [panel] → [Change Password] → [Sign Out]
+                Desktop: [Update Profile | Change Password | Sign Out] then [panel spanning 3 cols]
+            */}
+            <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-3">
+              {/* 1 — Update Profile tile */}
+              <div className="order-1">
                 <ActionTile
                   icon={UserRound}
                   title="Update Profile"
@@ -1114,42 +1143,52 @@ export default function Profile() {
                   aria-controls="update-profile-panel"
                   onClick={toggleUpdate}
                 />
+              </div>
 
-                <div
-                  id="update-profile-panel"
-                  ref={panelRef}
-                  className={`grid transition-all duration-500 ${
-                    updateOpen
-                      ? "mt-2.5 grid-rows-[1fr] opacity-100"
-                      : "mt-0 grid-rows-[0fr] opacity-0"
-                  }`}
-                >
-                  <div className="min-h-0 overflow-hidden">
-                    {panelMounted && (
-                      <UpdateProfilePanel
-                        onSaved={(updated) => setUser(getUser() || updated)}
-                        onClose={closeUpdate}
-                      />
-                    )}
-                  </div>
+              {/* 2 — Panel: sits right under Update Profile on mobile, below all tiles on desktop */}
+              <div
+                id="update-profile-panel"
+                ref={panelRef}
+                className={`order-2 grid w-full transition-all duration-500 sm:order-4 sm:col-span-3 ${
+                  updateOpen
+                    ? "mt-1 grid-rows-[1fr] opacity-100 sm:mt-3"
+                    : "mt-0 grid-rows-[0fr] opacity-0 pointer-events-none"
+                }`}
+              >
+                <div className="min-h-0 overflow-hidden">
+                  {panelMounted && (
+                    <UpdateProfilePanel
+                      onSaved={(updated) => {
+                        setUser(getUser() || updated);
+                        closeUpdate();
+                      }}
+                      onClose={closeUpdate}
+                    />
+                  )}
                 </div>
               </div>
 
-              <ActionTile
-                icon={LockKeyhole}
-                title="Change Password"
-                text="Update your sign-in password"
-                to="/change-password"
-                replace
-              />
+              {/* 3 — Change Password tile */}
+              <div className="order-3 sm:order-2">
+                <ActionTile
+                  icon={LockKeyhole}
+                  title="Change Password"
+                  text="Update your sign-in password"
+                  to="/change-password"
+                  replace
+                />
+              </div>
 
-              <ActionTile
-                icon={LogOut}
-                title="Sign Out"
-                text="End your session"
-                danger
-                onClick={handleLogout}
-              />
+              {/* 4 — Sign Out tile */}
+              <div className="order-4 sm:order-3">
+                <ActionTile
+                  icon={LogOut}
+                  title="Sign Out"
+                  text="End your session"
+                  danger
+                  onClick={handleLogout}
+                />
+              </div>
             </div>
           </section>
         </main>
