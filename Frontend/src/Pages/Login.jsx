@@ -89,6 +89,14 @@ export default function Login() {
       const userData =
         result.user || result.userData || result.profile || result;
 
+      localStorage.removeItem("userToken");
+      localStorage.removeItem("accessToken");
+      localStorage.removeItem("refreshToken");
+      localStorage.removeItem("user");
+      localStorage.removeItem("userInfo");
+      localStorage.removeItem("userData");
+      localStorage.removeItem("profile");
+
       localStorage.setItem("userToken", accessToken);
 
       if (refreshToken) {
@@ -98,9 +106,13 @@ export default function Login() {
       const profile = { ...userData };
       delete profile.accessToken;
       delete profile.refreshToken;
+
       localStorage.setItem(
         "user",
-        JSON.stringify({ ...profile, email: profile.email || email }),
+        JSON.stringify({
+          ...profile,
+          email: profile.email || email,
+        }),
       );
 
       window.dispatchEvent(new Event("auth-changed"));

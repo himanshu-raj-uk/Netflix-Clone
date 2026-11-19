@@ -534,33 +534,33 @@ function UpdateProfilePanel({ onSaved, onClose }) {
     setSuccess("");
   };
 
- const pickImage = (event) => {
-   const input = event.currentTarget;
-   const file = input.files?.[0];
+  const pickImage = (event) => {
+    const input = event.currentTarget;
+    const file = input.files?.[0];
 
-   if (!file) return;
+    if (!file) return;
 
-   if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) {
-     setError("Please select a JPG, PNG, or WebP image.");
-     input.value = "";
-     return;
-   }
+    if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) {
+      setError("Please select a JPG, PNG, or WebP image.");
+      input.value = "";
+      return;
+    }
 
-   if (file.size > MAX_IMAGE_SIZE) {
-     setError("Image must be under 2MB.");
-     input.value = "";
-     return;
-   }
+    if (file.size > MAX_IMAGE_SIZE) {
+      setError("Image must be under 2MB.");
+      input.value = "";
+      return;
+    }
 
-   imageFileRef.current = file;
-   setImageFile(file);
-   setRemoveImage(false);
-   setImageUrl(URL.createObjectURL(file));
-   setError("");
-   setSuccess("");
+    imageFileRef.current = file;
+    setImageFile(file);
+    setRemoveImage(false);
+    setImageUrl(URL.createObjectURL(file));
+    setError("");
+    setSuccess("");
 
-   input.value = "";
- };
+    input.value = "";
+  };
 
   const clearImage = () => {
     imageFileRef.current = null;
@@ -731,7 +731,9 @@ function UpdateProfilePanel({ onSaved, onClose }) {
             </button>
           )}
 
-          <p className="text-[10px] text-slate-500 lg:text-[11px]">JPG or PNG, up to 2MB</p>
+          <p className="text-[10px] text-slate-500 lg:text-[11px]">
+            JPG or PNG, up to 2MB
+          </p>
         </div>
       </div>
 
@@ -929,8 +931,7 @@ export default function Profile() {
       const response = await getMovieLists();
 
       // getMovieLists now returns the full axios response
-      const data =
-        response?.data?.data ?? response?.data ?? response;
+      const data = response?.data?.data ?? response?.data ?? response;
 
       if (!data || typeof data !== "object") {
         throw new Error("Invalid movie-list response.");
@@ -987,7 +988,6 @@ export default function Profile() {
 
   const handleLogout = () => {
     logout();
-    window.dispatchEvent(new Event("auth-changed"));
     navigate("/", { replace: true });
   };
 
