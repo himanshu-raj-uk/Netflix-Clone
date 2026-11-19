@@ -122,7 +122,7 @@ const login = async (req, res, next) => {
     });
 
     if (!user) {
-      throw new ApiError(404, "User not found");
+      throw new ApiError(404, "Email not found");
     }
 
     if (user.isBlocked) {
@@ -138,7 +138,7 @@ const login = async (req, res, next) => {
     const isMatch = await bcrypt.compare(password, user.password);
 
     if (!isMatch) {
-      throw new ApiError(401, "Invalid email or password");
+      throw new ApiError(401, "Password is wrong");
     }
 
     const accessToken = AccessToken(user);
@@ -157,6 +157,9 @@ const login = async (req, res, next) => {
           name: user.name,
           email: user.email,
           role: user.role,
+          profileImage: user.profileImage,
+          address: user.address,
+          phone: user.phone,
         },
         accessToken,
         refreshToken,
@@ -413,7 +416,7 @@ const updateProfile = async (req, res, next) => {
     user.name = clean.name;
     user.email = clean.email;
     if (clean.phone) user.phone = clean.phone;
-    user.address = clean.address;  
+    user.address = clean.address;
 
     console.log("FILE RECEIVED:", req.file);
 

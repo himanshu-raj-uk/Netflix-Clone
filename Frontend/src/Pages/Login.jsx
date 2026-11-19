@@ -107,11 +107,34 @@ export default function Login() {
       delete profile.accessToken;
       delete profile.refreshToken;
 
+      // Normalise profileImage so navbar always gets a plain string URL
+      let rawImage = profile.profileImage;
+      let imageUrl =
+        typeof rawImage === "string"
+          ? rawImage
+          : rawImage?.url || rawImage?.secure_url || "";
+
+      // Fallback: If not in login payload, fetch from /user/profile
+      if (!imageUrl) {
+        try {
+          const profileRes = await AuthAPI.getUserProfile();
+          const pData = profileRes?.data?.data || profileRes?.data;
+          const fetchedImage = pData?.profileImage;
+          imageUrl =
+            typeof fetchedImage === "string"
+              ? fetchedImage
+              : fetchedImage?.url || fetchedImage?.secure_url || "";
+        } catch (_) {
+          // Ignore fallback error
+        }
+      }
+
       localStorage.setItem(
         "user",
         JSON.stringify({
           ...profile,
           email: profile.email || email,
+          profileImage: imageUrl,
         }),
       );
 
@@ -120,17 +143,35 @@ export default function Login() {
       navigate("/", { replace: true });
     } catch (error) {
       const status = error.response?.status;
-      const message = getMessage(error, "Unable to sign in. Please try again.");
+      const serverMsg = error.response?.data?.message;
+      const message = serverMsg || getMessage(error, "Unable to sign in. Please try again.");
+      const isTimeout =
+        error.code === "ECONNABORTED" ||
+        error.message?.includes("timeout") ||
+        error.name === "CanceledError" ||
+        !error.response;
 
-      if (status === 404) {
+      if (
+        status === 404 ||
+        /email.*not.*found|user.*not.*found|no.*account/i.test(message)
+      ) {
         setErrors({
           ...EMPTY_ERRORS,
-          email: "No account found with this email. Please sign up.",
+          email: "Email not found. Please check your email or sign up.",
         });
-      } else if (status === 401) {
+      } else if (
+        status === 401 ||
+        /password.*wrong|password.*incorrect|invalid.*password|incorrect.*password|invalid.*credentials/i.test(message)
+      ) {
         setErrors({
           ...EMPTY_ERRORS,
-          password: "Incorrect email or password.",
+          password: "Password is wrong. Please try again.",
+        });
+      } else if (isTimeout) {
+        // When server times out or hangs on wrong password
+        setErrors({
+          ...EMPTY_ERRORS,
+          password: "Password is wrong. Please try again.",
         });
       } else {
         const field = fieldFromMessage(message, {

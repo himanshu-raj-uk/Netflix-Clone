@@ -60,14 +60,23 @@ app.use((req, res) => {
 // ---------- Error handler ----------
 app.use((err, req, res, next) => {
   const statusCode = err.statusCode || err.status || 500;
-   console.error("ERROR DETAILS:", {
-     message: err.message,
-     name: err.name,
-     http_code: err.http_code,
-     error: err.error,
-     cause: err.cause,
-     stack: err.stack,
-   });
+  console.error("ERROR DETAILS:", {
+    message: err.message,
+    name: err.name,
+    http_code: err.http_code,
+    error: err.error,
+    cause: err.cause,
+    stack: err.stack,
+  });
+
+  if (res.headersSent) {
+    return next(err);
+  }
+
+  res.status(statusCode).json({
+    status: false,
+    message: err.message || "Internal Server Error",
+  });
 });
 
 // ---------- Start ----------

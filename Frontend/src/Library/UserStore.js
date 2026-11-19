@@ -26,7 +26,15 @@ export function getUser() {
 
 export function saveUser(patch) {
     const current = getUser() || {};
-    const next = { ...current, ...patch };
+
+    // Always store profileImage as a plain string URL
+    const rawImage = patch.profileImage ?? current.profileImage;
+    const imageUrl =
+        typeof rawImage === "string"
+            ? rawImage
+            : rawImage?.url || rawImage?.secure_url || "";
+
+    const next = { ...current, ...patch, profileImage: imageUrl };
     localStorage.setItem("user", JSON.stringify(next));
     window.dispatchEvent(new Event("auth-changed"));
     return next;

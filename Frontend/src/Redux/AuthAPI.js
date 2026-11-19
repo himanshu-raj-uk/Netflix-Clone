@@ -11,7 +11,7 @@ export const registerUserByGoogle = (data) => {
 };
 
 export const loginUser = (data) => {
-  return axiosInstance.post("/user/login", data);
+  return axiosInstance.post("/user/login", data, { timeout: 6000 });
 };
 
 export const verifyOTP = ({ otp, token }) => {

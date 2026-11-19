@@ -3,7 +3,8 @@ import { Link, useLocation } from "react-router-dom";
 import { Check, ChevronDown, Globe, UserRound } from "lucide-react";
 import { useLanguage } from "../Context/LanguageContext";
 import { translations } from "../Data/Translations";
-import { getUser } from "../Library/UserStore";
+import { getUser, saveUser } from "../Library/UserStore";
+import { getUserProfile } from "../Redux/AuthAPI";
 import NavSearch from "./Navesearch";
 
 const LANGUAGES = [
@@ -34,7 +35,7 @@ function Avatar({ user, className = "" }) {
   const src =
     typeof user?.profileImage === "string"
       ? user.profileImage
-      : user?.profileImage?.url || "";
+      : user?.profileImage?.url || user?.profileImage?.secure_url || "";
 
   return (
     <span
@@ -211,6 +212,27 @@ export default function Navbar() {
     const sync = () => setUser(getUser());
     window.addEventListener("auth-changed", sync);
     window.addEventListener("storage", sync);
+
+    if (localStorage.getItem("userToken")) {
+      const currentUser = getUser();
+      if (!currentUser?.profileImage) {
+        getUserProfile()
+          .then((res) => {
+            const u = res?.data?.data || res?.data;
+            if (u?.profileImage) {
+              const imgUrl =
+                typeof u.profileImage === "string"
+                  ? u.profileImage
+                  : u.profileImage?.url || u.profileImage?.secure_url || "";
+              if (imgUrl) {
+                saveUser({ profileImage: imgUrl });
+              }
+            }
+          })
+          .catch(() => {});
+      }
+    }
+
     return () => {
       window.removeEventListener("auth-changed", sync);
       window.removeEventListener("storage", sync);
