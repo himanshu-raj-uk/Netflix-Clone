@@ -33,7 +33,7 @@ export default function Home() {
       <Banner />
 
       {/* Rows Container */}
-      <div className="relative z-10 space-y-4 pb-12 pt-2 sm:space-y-6 sm:pt-4 md:space-y-8 md:pt-6">
+      <div className="relative z-10 space-y-1 pb-1 pt-1 sm:space-y-4 sm:pb-4 sm:pt-3 md:space-y-6 md:pb-6 md:pt-4">
         {ROWS.map((row) => (
           <Row
             key={row.title}

@@ -209,7 +209,7 @@ export default function MovieCard({ movie }) {
 
   return (
     <article
-      className="group relative aspect-[2/3] min-w-0 overflow-hidden rounded-xl border border-[#8B5CF6]/30 bg-[#111827] shadow-lg transition-all duration-300 ease-out hover:-translate-y-1 hover:border-[#8B5CF6] focus-within:border-[#8B5CF6]"
+      className="group relative aspect-[2/3] min-w-0 overflow-hidden rounded-2xl border border-white/10 bg-[#0B1020] shadow-[0_12px_28px_rgba(0,0,0,0.65)] transition-all duration-300 ease-out hover:-translate-y-2 hover:scale-[1.04] hover:border-[#8B5CF6] hover:shadow-[0_20px_45px_-10px_rgba(139,92,246,0.5),0_10px_25px_-5px_rgba(34,211,238,0.3)] focus-within:border-[#8B5CF6] will-change-transform"
     >
       {/* Skeleton loader shimmer */}
       {!loaded && (
@@ -224,11 +224,17 @@ export default function MovieCard({ movie }) {
           loading="lazy"
           onLoad={() => setLoaded(true)}
           onError={() => setLoaded(true)}
-          className={`h-full w-full object-cover transition-transform duration-300 ease-out group-hover:scale-[1.03] ${
+          className={`h-full w-full object-cover transition-transform duration-500 ease-out group-hover:scale-105 ${
             loaded ? "opacity-100" : "opacity-0"
           }`}
         />
       )}
+
+      {/* 3D Glass Light Sweep Effect */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0 bg-gradient-to-tr from-transparent via-white/[0.08] to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100"
+      />
 
       {!imageUrl && (
         <div className="flex h-full items-center justify-center p-3 text-center text-xs text-slate-400">
