@@ -34,6 +34,7 @@ const register = async (req, res, next) => {
     const hashPassword = await bcrypt.hash(password, 10);
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
     const hashOtp = await bcrypt.hash(otp, 10);
+    console.log(hashOtp);
 
     await PendingUser.deleteOne({
       $or: [{ email: normalizedEmail }, { phone }],
@@ -185,6 +186,7 @@ const verifyOTP = async (req, res, next) => {
       : authHeader;
 
     const { otp } = req.body;
+    console.log(otp);
 
     const user = await verifyOTPService(token, String(otp));
 
