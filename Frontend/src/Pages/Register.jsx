@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { LoaderCircle, Mail, LockKeyhole, User, Phone } from "lucide-react";
+import { LoaderCircle, Mail, LockKeyhole, User } from "lucide-react";
 import * as AuthAPI from "../Redux/AuthAPI";
 import {
   AuthLayout,
@@ -20,7 +20,6 @@ import {
 const EMPTY_ERRORS = {
   name: "",
   email: "",
-  phone: "",
   password: "",
   confirmPassword: "",
   form: "",
@@ -32,19 +31,21 @@ export default function Register() {
   const [formData, setFormData] = useState({
     name: "",
     email: "",
-    phone: "",
     password: "",
     confirmPassword: "",
   });
+
   const [errors, setErrors] = useState(EMPTY_ERRORS);
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
 
   const handleChange = (e) => {
-    let { name, value } = e.target;
-    if (name === "phone") value = value.replace(/\D/g, "").slice(0, 10);
-    setFormData((prev) => ({ ...prev, [name]: value }));
-    setErrors((prev) => ({ ...prev, [name]: "", form: "" }));
+    const { id, value } = e.target;
+
+    setFormData((prev) => ({
+      ...prev,
+      [id]: value,
+    }));
   };
 
   const goToOtp = (token, email, message = "") => {
@@ -58,9 +59,10 @@ export default function Register() {
 
     const name = formData.name.trim();
     const email = normalizeEmail(formData.email);
-    const { phone, password, confirmPassword } = formData;
+    const { password, confirmPassword } = formData;
 
     const next = { ...EMPTY_ERRORS };
+
     if (!name) next.name = "Please enter your name.";
     else if (name.length < 3) next.name = "Name must be at least 3 characters.";
     else if (name.length > 50)
@@ -68,9 +70,6 @@ export default function Register() {
 
     if (!email) next.email = "Please enter your email address.";
     else if (!isEmail(email)) next.email = "Enter a valid email address.";
-
-    if (!/^[0-9]{10}$/.test(phone))
-      next.phone = "Enter a valid 10-digit mobile number.";
 
     if (!password) next.password = "Please create a password.";
     else if (password.length < 6 || password.length > 20)
@@ -89,8 +88,8 @@ export default function Register() {
         name,
         email,
         password,
-        phone,
       });
+
       goToOtp(
         response.data?.verificationToken,
         response.data?.data?.email || email,
@@ -110,8 +109,8 @@ export default function Register() {
         error,
         "Unable to create your account. Please try again.",
       );
+
       const field = fieldFromMessage(message, {
-        phone: /mobile|phone/i,
         email: /email/i,
         password: /password/i,
         name: /name/i,
@@ -121,14 +120,6 @@ export default function Register() {
         setErrors({
           ...EMPTY_ERRORS,
           email: "This email is already registered. Please sign in.",
-        });
-      } else if (
-        field === "phone" &&
-        /already|registered|exist/i.test(message)
-      ) {
-        setErrors({
-          ...EMPTY_ERRORS,
-          phone: "This mobile number is already registered.",
         });
       } else {
         setErrors({ ...EMPTY_ERRORS, [field]: message });
@@ -169,20 +160,6 @@ export default function Register() {
             disabled={loading}
             error={errors.name}
           />
-          <Field
-            compact
-            id="phone"
-            label="Mobile number"
-            icon={Phone}
-            type="tel"
-            inputMode="numeric"
-            autoComplete="tel"
-            placeholder="10-digit number"
-            value={formData.phone}
-            onChange={handleChange}
-            disabled={loading}
-            error={errors.phone}
-          />
         </div>
 
         <Field
@@ -214,6 +191,7 @@ export default function Register() {
             error={errors.password}
             right={toggle}
           />
+
           <Field
             compact
             id="confirmPassword"

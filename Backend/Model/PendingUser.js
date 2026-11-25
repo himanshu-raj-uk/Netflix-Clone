@@ -24,13 +24,6 @@ const pendingUserModel = new mongoose.Schema(
             minlength: 6,
         },
 
-        phone: {
-            type: String,
-            required: true,
-            unique: true,
-            trim: true,
-        },
-
         otp: {
             type: String,
             required: true,

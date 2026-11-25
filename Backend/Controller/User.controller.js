@@ -21,15 +21,11 @@ const { AccessToken, RefreshToken } = require("../Config/Token");
 
 const register = async (req, res, next) => {
   try {
-    const { name, email, password, phone } = req.body;
+    const { name, email, password } = req.body;
     const normalizedEmail = email.toLowerCase();
 
     const existingEmail = await User.findOne({ email: normalizedEmail });
     if (existingEmail) throw new ApiError(400, "Email is already registered");
-
-    const existingPhone = await User.findOne({ phone });
-    if (existingPhone)
-      throw new ApiError(400, "Mobile number is already registered");
 
     const hashPassword = await bcrypt.hash(password, 10);
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
@@ -37,14 +33,13 @@ const register = async (req, res, next) => {
     console.log(hashOtp);
 
     await PendingUser.deleteOne({
-      $or: [{ email: normalizedEmail }, { phone }],
+      $or: [{ email: normalizedEmail }],
     });
 
     const pendingUser = await PendingUser.create({
       name,
       email: normalizedEmail,
       password: hashPassword,
-      phone,
       otp: hashOtp,
       otpExpire: new Date(Date.now() + 5 * 60 * 1000),
     });
@@ -55,7 +50,6 @@ const register = async (req, res, next) => {
       { expiresIn: "10m" },
     );
 
-    // Respond immediately — don't make the user wait on the email round-trip
     res.status(201).json({
       status: true,
       message: "OTP sent successfully.",
@@ -160,7 +154,6 @@ const login = async (req, res, next) => {
           role: user.role,
           profileImage: user.profileImage,
           address: user.address,
-          phone: user.phone,
         },
         accessToken,
         refreshToken,
@@ -367,7 +360,7 @@ const updateProfile = async (req, res, next) => {
     const user = await User.findById(req.user._id);
     if (!user) return next(new ApiError(404, "User not found"));
 
-    const { name, email, phone, address, removeImage } = req.body;
+    const { name, email, address, removeImage } = req.body;
 
     let addr;
     try {
@@ -379,7 +372,6 @@ const updateProfile = async (req, res, next) => {
     const clean = {
       name: name?.trim(),
       email: email?.trim().toLowerCase(),
-      phone: phone?.trim(),
       address: {
         fullName: addr.fullName?.trim(),
         houseNo: addr.houseNo?.trim(),
@@ -396,8 +388,6 @@ const updateProfile = async (req, res, next) => {
       return next(new ApiError(400, "Name must be at least 2 characters"));
     if (!clean.email || !/^\S+@\S+\.\S+$/.test(clean.email))
       return next(new ApiError(400, "Valid email is required"));
-    if (user.authProvider !== "google" && !/^\d{10}$/.test(clean.phone || ""))
-      return next(new ApiError(400, "Phone must be 10 digits"));
     for (const key of [
       "fullName",
       "houseNo",
@@ -417,7 +407,6 @@ const updateProfile = async (req, res, next) => {
 
     user.name = clean.name;
     user.email = clean.email;
-    if (clean.phone) user.phone = clean.phone;
     user.address = clean.address;
 
     console.log("FILE RECEIVED:", req.file);

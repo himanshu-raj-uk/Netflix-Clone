@@ -64,7 +64,7 @@ const AUTH_CSS = `
 `;
 
 const fieldClass = (hasError, compact) =>
-  `auth-input ${compact ? "h-9 sm:h-10 text-xs sm:text-sm" : "h-10 sm:h-11 text-xs sm:text-sm"} w-full rounded-xl border bg-[#0b0f19]/80 py-2 pl-9 sm:pl-10 pr-4 text-white outline-none transition-all duration-200 placeholder:text-slate-500 hover:border-[#8B5CF6]/50 focus:border-[#8B5CF6] focus:ring-2 focus:ring-[#8B5CF6]/25 disabled:cursor-not-allowed disabled:opacity-60 ${
+  `auth-input ${compact ? "h-12 sm:h-10 text-xs sm:text-sm" : "h-12 sm:h-11 text-xs sm:text-sm"} w-full rounded-xl border bg-[#0b0f19]/80 py-2 pl-9 sm:pl-10 pr-4 text-white outline-none transition-all duration-200 placeholder:text-slate-500 hover:border-[#8B5CF6]/50 focus:border-[#8B5CF6] focus:ring-2 focus:ring-[#8B5CF6]/25 disabled:cursor-not-allowed disabled:opacity-60 ${
     hasError
       ? "border-red-500/80 focus:border-red-500 focus:ring-red-500/20"
       : "border-white/10"

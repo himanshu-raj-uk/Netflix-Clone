@@ -6,16 +6,29 @@ const transporter = nodemailer.createTransport({
     user: process.env.GOOGLE_USER_NAME,
     pass: process.env.GOOGLE_USER_PASSWORD,
   },
-  connectionTimeout: 10000,
-  greetingTimeout: 10000, 
-  socketTimeout: 15000, 
+  pool: true,
+  maxConnections: 3,
+  maxMessages: 50,
+  connectionTimeout: 20000, 
+  greetingTimeout: 20000,
+  socketTimeout: 20000,
 });
 
-transporter.verify((err) => {
-  if (err) {
-    console.error("NODEMAILER CONFIG ERROR:", err.message);
-  }
-});
+function verifyTransporter(attempt = 1) {
+  transporter.verify((err) => {
+    if (err) {
+      if (attempt < 2) {
+        setTimeout(() => verifyTransporter(attempt + 1), 5000);
+      } else {
+        console.error("NODEMAILER CONFIG ERROR:", err.message);
+      }
+    } else {
+      console.log("Nodemailer transporter verified and ready.");
+    }
+  });
+}
+
+setTimeout(() => verifyTransporter(), 3000); 
 
 const sendEmail = async ({ to, subject, html }) => {
   try {

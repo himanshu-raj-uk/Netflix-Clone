@@ -14,6 +14,15 @@ import {
   primaryBtn,
 } from "./AuthUI";
 
+const OTP_TTL_MS = 5 * 60 * 1000; 
+
+function formatTime(ms) {
+  const totalSec = Math.max(0, Math.ceil(ms / 1000));
+  const m = Math.floor(totalSec / 60);
+  const s = totalSec % 60;
+  return `${m}:${String(s).padStart(2, "0")}`;
+}
+
 export default function VerifyOTP() {
   const navigate = useNavigate();
   const location = useLocation();
@@ -25,18 +34,37 @@ export default function VerifyOTP() {
   const [loading, setLoading] = useState(false);
   const [cooldown, setCooldown] = useState(30);
 
+  const [expiresAt] = useState(() => {
+    if (!flow?.token) return Date.now(); 
+    const existing = flow.otpExpiresAt;
+    if (existing && existing > Date.now()) return existing;
+    const fresh = Date.now() + OTP_TTL_MS;
+    authFlow.save({ ...flow, otpExpiresAt: fresh });
+    return fresh;
+  });
+
+  const [remainingMs, setRemainingMs] = useState(() => expiresAt - Date.now());
+  const otpExpired = remainingMs <= 0;
+
   useEffect(() => {
     if (cooldown <= 0) return;
     const timer = setTimeout(() => setCooldown((c) => c - 1), 1000);
     return () => clearTimeout(timer);
   }, [cooldown]);
 
+  useEffect(() => {
+    const tick = () => setRemainingMs(Math.max(0, expiresAt - Date.now()));
+    tick();
+    const interval = setInterval(tick, 1000);
+    return () => clearInterval(interval);
+  }, [expiresAt]);
+
   if (!flow?.token) return <Navigate to="/login" replace />;
 
   const isReset = flow.mode === "reset";
 
   const verify = async (code) => {
-    if (loading) return;
+    if (loading || otpExpired) return;
     if (code.length !== 6) return setError("Enter the 6-digit code.");
 
     setLoading(true);
@@ -44,7 +72,10 @@ export default function VerifyOTP() {
     setInfo("");
 
     try {
-      const response = await AuthAPI.verifyOTP({ otp: code, token: flow.token });
+      const response = await AuthAPI.verifyOTP({
+        otp: code,
+        token: flow.token,
+      });
       const data = response.data?.data || {};
 
       if (isReset) {
@@ -70,24 +101,15 @@ export default function VerifyOTP() {
   };
 
   const handleChange = (value) => {
+    if (otpExpired) return;
     setOtp(value);
     setError("");
     if (value.length === 6) verify(value);
   };
 
-  const handleResend = async () => {
+  const handleResend = () => {
     if (cooldown > 0 || loading) return;
-
-    try {
-      await AuthAPI.resendOTP(flow.token);
-      setOtp("");
-      setError("");
-      setInfo("A new code has been sent to your email.");
-      setCooldown(30);
-    } catch (err) {
-      setInfo("");
-      setError(getMessage(err, "Could not resend the code. Try again shortly."));
-    }
+    navigate("/resend-otp");
   };
 
   return (
@@ -110,11 +132,29 @@ export default function VerifyOTP() {
         }}
         noValidate
       >
-        <OtpInput value={otp} onChange={handleChange} disabled={loading} error={error} />
+        <OtpInput
+          value={otp}
+          onChange={handleChange}
+          disabled={loading || otpExpired}
+          error={error}
+        />
+
+        <p className="mt-2 text-xs text-slate-400">
+          {otpExpired ? (
+            <span className="text-red-400">Code expired. Please resend.</span>
+          ) : (
+            <>
+              Code expires in{" "}
+              <span className="font-medium text-slate-200">
+                {formatTime(remainingMs)}
+              </span>
+            </>
+          )}
+        </p>
 
         <button
           type="submit"
-          disabled={loading || otp.length !== 6}
+          disabled={loading || otp.length !== 6 || otpExpired}
           className={`${primaryBtn} mt-3`}
         >
           {loading ? (

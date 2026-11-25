@@ -13,14 +13,15 @@ import {
   primaryBtn,
 } from "./AuthUI";
 
+const OTP_TTL_MS = 5 * 60 * 1000; 
+
 export default function ResendOTP() {
   const navigate = useNavigate();
-  const flow = authFlow.get(); // { mode, email, token }
+  const flow = authFlow.get(); 
 
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  // Nothing pending to resend
   if (!flow?.token) return <Navigate to="/register" replace />;
 
   const handleResend = async () => {
@@ -31,12 +32,17 @@ export default function ResendOTP() {
 
     try {
       await AuthAPI.resendOTP(flow.token);
+
+      authFlow.save({ ...flow, otpExpiresAt: Date.now() + OTP_TTL_MS });
+
       navigate("/verify-otp", {
         replace: true,
         state: { message: "A new code has been sent to your email." },
       });
     } catch (err) {
-      setError(getMessage(err, "Could not resend the code. Try again shortly."));
+      setError(
+        getMessage(err, "Could not resend the code. Try again shortly."),
+      );
     } finally {
       setLoading(false);
     }
