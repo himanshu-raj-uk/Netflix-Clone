@@ -6,8 +6,7 @@ const cors = require("cors");
 const connectDB = require("./Config/MongoDB");
 
 const user = require("./Routes/UserRoute");
-const errorMiddleware = require("./Middleware/Error");
-
+const errorMiddleware = require("./MiddleWare/Error");
 const app = express();
 
 app.set("trust proxy", 1);
